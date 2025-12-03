@@ -1,32 +1,33 @@
 # Tasks: Dashboards & Visualization
 
-## Phase 1: Backend - KPI History API
-- [ ] **1.1 History Endpoint**
+## Phase 1: Backend - KPI History API ✅
+- [x] **1.1 History Endpoint**
   - Add `GET /api/kpis/:id/history` endpoint
   - Query params: `period` (7d, 30d, 90d, 1y), `interval` (hourly, daily, weekly)
   - Aggregate DataValues by interval
   - Return `{ data: [{ timestamp, value }], period, interval }`
 
-- [ ] **1.2 Period Comparison**
+- [x] **1.2 Period Comparison**
   - Add comparison calculation to KPI response
   - Compare current value to previous period (same duration)
   - Return `{ change: 12.5, direction: "up" }`
 
-## Phase 2: Backend - Dashboard API
-- [ ] **2.1 Dashboard CRUD**
+## Phase 2: Backend - Dashboard API ✅
+- [x] **2.1 Dashboard CRUD**
   - `GET /api/dashboards` - List all
   - `GET /api/dashboards/:id` - Get with widgets
   - `POST /api/dashboards` - Create
   - `PUT /api/dashboards/:id` - Update name/layout
   - `DELETE /api/dashboards/:id` - Delete
 
-- [ ] **2.2 Widget CRUD**
+- [x] **2.2 Widget CRUD**
   - `POST /api/dashboards/:id/widgets` - Add widget
   - `PUT /api/dashboards/:id/widgets/:widgetId` - Update widget
   - `DELETE /api/dashboards/:id/widgets/:widgetId` - Delete widget
 
-- [ ] **2.3 Layout Persistence**
+- [x] **2.3 Layout Persistence**
   - Store grid positions in Dashboard.layout JSON
+  - `PUT /api/dashboards/:id/layout` - Batch update positions
   - Support responsive breakpoints (lg, md, sm)
 
 ## Phase 3: Frontend - Chart Library Setup

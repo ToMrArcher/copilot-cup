@@ -2,6 +2,8 @@ import { Router, Request, Response } from 'express'
 import { prisma } from '../../db/client'
 import { calculateKpi, updateKpiValue } from '../../services/kpi-calculator.service'
 import { validateFormula } from '../../services/formula.service'
+import { getKpiHistory } from '../../services/kpi-history.service'
+import { AggregationInterval } from '../../types/kpi-history.types'
 
 export const kpiRouter = Router()
 
@@ -78,6 +80,41 @@ kpiRouter.get('/available-fields', async (_req: Request, res: Response) => {
   } catch (error) {
     console.error('Error fetching available fields:', error)
     res.status(500).json({ error: 'Failed to fetch available fields' })
+  }
+})
+
+/**
+ * GET /api/kpis/:id/history
+ * Get historical KPI values for time-series visualization
+ * Query params:
+ *   - period: Time period (e.g., '7d', '30d', '90d', '1y') - default: '30d'
+ *   - interval: Aggregation interval ('hourly', 'daily', 'weekly', 'monthly') - auto if not specified
+ */
+kpiRouter.get('/:id/history', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+    const period = (req.query.period as string) || '30d'
+    const interval = req.query.interval as AggregationInterval | undefined
+
+    // Validate interval if provided
+    if (interval && !['hourly', 'daily', 'weekly', 'monthly'].includes(interval)) {
+      res.status(400).json({ 
+        error: 'Invalid interval. Must be: hourly, daily, weekly, or monthly' 
+      })
+      return
+    }
+
+    const history = await getKpiHistory(id, period, interval)
+
+    if (!history) {
+      res.status(404).json({ error: 'KPI not found' })
+      return
+    }
+
+    res.json(history)
+  } catch (error) {
+    console.error('Error fetching KPI history:', error)
+    res.status(500).json({ error: 'Failed to fetch KPI history' })
   }
 })
 

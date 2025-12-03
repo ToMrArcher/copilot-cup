@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import { healthRouter } from './modules/health'
 import { integrationRouter } from './modules/integrations/integration.router'
 import { kpiRouter } from './modules/kpi'
+import { dashboardRouter } from './modules/dashboard/dashboard.router'
 
 // Load environment variables
 dotenv.config()
@@ -19,12 +20,9 @@ app.use(express.json())
 app.use('/health', healthRouter)
 app.use('/api/integrations', integrationRouter)
 app.use('/api/kpis', kpiRouter)
+app.use('/api/dashboards', dashboardRouter)
 
 // Placeholder routes for other feature modules
-app.get('/api/dashboards', (_req, res) => {
-  res.json({ message: 'Dashboard module - coming soon' })
-})
-
 app.get('/api/auth', (_req, res) => {
   res.json({ message: 'Auth module - coming soon' })
 })
