@@ -6,11 +6,12 @@ interface IntegrationCardProps {
   onDelete: (id: string) => void
   onSync: (id: string) => void
   onTest: (id: string) => void
+  onEnterData?: (id: string) => void
 }
 
 const statusStyles: Record<IntegrationStatus, { bg: string; text: string; dot: string }> = {
   pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', dot: 'bg-yellow-400' },
-  connected: { bg: 'bg-blue-100', text: 'text-blue-800', dot: 'bg-blue-400' },
+  connected: { bg: 'bg-violet-100', text: 'text-violet-800', dot: 'bg-blue-400' },
   synced: { bg: 'bg-green-100', text: 'text-green-800', dot: 'bg-green-400' },
   error: { bg: 'bg-red-100', text: 'text-red-800', dot: 'bg-red-400' },
 }
@@ -44,8 +45,10 @@ export function IntegrationCard({
   onDelete,
   onSync,
   onTest,
+  onEnterData,
 }: IntegrationCardProps) {
   const status = statusStyles[integration.status]
+  const isManual = integration.type === 'MANUAL'
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
@@ -83,12 +86,21 @@ export function IntegrationCard({
       </div>
 
       <div className="mt-4 pt-4 border-t border-gray-100 flex gap-2">
-        <button
-          onClick={() => onSync(integration.id)}
-          className="flex-1 px-3 py-1.5 text-sm text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
-        >
-          Sync Now
-        </button>
+        {isManual && onEnterData ? (
+          <button
+            onClick={() => onEnterData(integration.id)}
+            className="flex-1 px-3 py-1.5 text-sm text-white bg-violet-600 hover:bg-violet-700 rounded-md transition-colors font-medium"
+          >
+            Enter Data
+          </button>
+        ) : (
+          <button
+            onClick={() => onSync(integration.id)}
+            className="flex-1 px-3 py-1.5 text-sm text-violet-600 hover:bg-violet-50 rounded-md transition-colors"
+          >
+            Sync Now
+          </button>
+        )}
         <button
           onClick={() => onTest(integration.id)}
           className="flex-1 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-md transition-colors"

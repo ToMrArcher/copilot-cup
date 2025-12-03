@@ -99,7 +99,7 @@ export function FieldMapper({ sourceFields, mappedFields, onMappingChange }: Fie
       {/* Source Fields Panel */}
       <div>
         <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+          <span className="w-2 h-2 rounded-full bg-violet-500"></span>
           Available Fields ({unmappedFields.length})
         </h3>
         <div className="border rounded-lg bg-gray-50 min-h-[300px] p-3">
@@ -146,7 +146,7 @@ export function FieldMapper({ sourceFields, mappedFields, onMappingChange }: Fie
           onDrop={handleDrop}
           className={`border-2 rounded-lg min-h-[300px] p-3 transition-colors ${
             dropTarget === 'mapped'
-              ? 'border-indigo-400 bg-indigo-50'
+              ? 'border-indigo-400 bg-violet-50'
               : 'border-dashed border-gray-300 bg-white'
           }`}
         >
@@ -184,7 +184,7 @@ export function FieldMapper({ sourceFields, mappedFields, onMappingChange }: Fie
                             targetField: e.target.value,
                           })
                         }
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500"
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-violet-500"
                       />
                     </div>
                     <div>
@@ -196,7 +196,7 @@ export function FieldMapper({ sourceFields, mappedFields, onMappingChange }: Fie
                             fieldType: e.target.value as DataField['fieldType'],
                           })
                         }
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500"
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-violet-500"
                       >
                         <option value="STRING">String</option>
                         <option value="NUMBER">Number</option>
@@ -218,7 +218,7 @@ export function FieldMapper({ sourceFields, mappedFields, onMappingChange }: Fie
                         })
                       }
                       placeholder="e.g., value * 100, value.toUpperCase()"
-                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-indigo-500 font-mono"
+                      className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-violet-500 font-mono"
                     />
                   </div>
                 </div>

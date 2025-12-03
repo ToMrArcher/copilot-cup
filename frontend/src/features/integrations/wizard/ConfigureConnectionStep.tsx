@@ -34,7 +34,7 @@ export function ConfigureConnectionStep({ state, updateState }: ConfigureConnect
               value={state.config.url || ''}
               onChange={e => updateConfig('url', e.target.value)}
               placeholder="https://api.example.com/data"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-violet-500 focus:border-violet-500"
             />
           </div>
 
@@ -47,7 +47,7 @@ export function ConfigureConnectionStep({ state, updateState }: ConfigureConnect
               id="method"
               value={state.config.method || 'GET'}
               onChange={e => updateConfig('method', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-violet-500 focus:border-violet-500"
             >
               <option value="GET">GET</option>
               <option value="POST">POST</option>
@@ -63,7 +63,7 @@ export function ConfigureConnectionStep({ state, updateState }: ConfigureConnect
               id="authType"
               value={state.config.authType || 'none'}
               onChange={e => updateConfig('authType', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-violet-500 focus:border-violet-500"
             >
               <option value="none">None</option>
               <option value="bearer">Bearer Token</option>
@@ -86,7 +86,7 @@ export function ConfigureConnectionStep({ state, updateState }: ConfigureConnect
                 value={state.config.authValue || ''}
                 onChange={e => updateConfig('authValue', e.target.value)}
                 placeholder="Enter your credentials"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-violet-500 focus:border-violet-500"
               />
               <p className="mt-1 text-xs text-gray-500">
                 Your credentials will be encrypted before storage.
@@ -105,7 +105,7 @@ export function ConfigureConnectionStep({ state, updateState }: ConfigureConnect
               onChange={e => updateConfig('headers', e.target.value)}
               placeholder='{"Content-Type": "application/json"}'
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-violet-500 focus:border-violet-500 font-mono text-sm"
             />
           </div>
         </div>
@@ -135,7 +135,7 @@ export function ConfigureConnectionStep({ state, updateState }: ConfigureConnect
               onChange={e => updateConfig('description', e.target.value)}
               placeholder="Describe what data will be entered manually..."
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-violet-500 focus:border-violet-500"
             />
           </div>
 
@@ -148,7 +148,7 @@ export function ConfigureConnectionStep({ state, updateState }: ConfigureConnect
               id="updateFrequency"
               value={state.config.updateFrequency || 'weekly'}
               onChange={e => updateConfig('updateFrequency', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-violet-500 focus:border-violet-500"
             >
               <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>

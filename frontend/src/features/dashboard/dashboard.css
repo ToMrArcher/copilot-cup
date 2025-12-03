@@ -1,0 +1,45 @@
+/**
+ * Dashboard Grid Responsive Styles
+ */
+
+/* Default: Desktop (12 columns) */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+  grid-auto-rows: 100px;
+}
+
+/* Tablet: 8 columns */
+@media (max-width: 1023px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(8, 1fr);
+  }
+  
+  /* Scale down column spans proportionally */
+  .dashboard-grid > * {
+    --scaled-cols: calc(var(--widget-cols) * 8 / 12);
+  }
+}
+
+/* Mobile: Stack widgets (2 columns for small widgets, full width for larger) */
+@media (max-width: 639px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  /* All widgets take at least 4 columns (full width) on mobile */
+  .dashboard-grid > * {
+    grid-column: span 4 !important;
+  }
+}
+
+/* Widget container styling */
+.dashboard-widget {
+  min-height: 100px;
+  transition: box-shadow 0.2s ease;
+}
+
+.dashboard-widget:hover {
+  z-index: 10;
+}

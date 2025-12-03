@@ -336,6 +336,132 @@ integrationRouter.post('/:id/sync', async (req: Request, res: Response) => {
 })
 
 /**
+ * POST /api/integrations/:id/data
+ * Submit manual data values for a MANUAL type integration
+ */
+integrationRouter.post('/:id/data', async (req: Request, res: Response) => {
+  try {
+    const integration = await prisma.integration.findUnique({
+      where: { id: req.params.id },
+      include: { dataFields: true },
+    })
+
+    if (!integration) {
+      res.status(404).json({ error: 'Integration not found' })
+      return
+    }
+
+    if (integration.type !== 'MANUAL') {
+      res.status(400).json({ error: 'This endpoint is only for manual integrations' })
+      return
+    }
+
+    // Expecting { values: { fieldId: value, ... } }
+    const { values } = req.body as { values: Record<string, unknown> }
+
+    if (!values || typeof values !== 'object') {
+      res.status(400).json({ error: 'Values object is required' })
+      return
+    }
+
+    const syncedAt = new Date()
+    const dataValuesToCreate: { dataFieldId: string; value: unknown; syncedAt: Date }[] = []
+
+    for (const field of integration.dataFields) {
+      if (values[field.id] !== undefined) {
+        dataValuesToCreate.push({
+          dataFieldId: field.id,
+          value: values[field.id],
+          syncedAt,
+        })
+      }
+    }
+
+    if (dataValuesToCreate.length === 0) {
+      res.status(400).json({ error: 'No valid values provided for existing fields' })
+      return
+    }
+
+    // Bulk create data values
+    await prisma.dataValue.createMany({
+      data: dataValuesToCreate.map(dv => ({
+        dataFieldId: dv.dataFieldId,
+        value: dv.value as object,
+        syncedAt: dv.syncedAt,
+      })),
+    })
+
+    // Update last sync time
+    await prisma.integration.update({
+      where: { id: req.params.id },
+      data: {
+        lastSync: syncedAt,
+        status: 'synced',
+      },
+    })
+
+    res.json({
+      success: true,
+      fieldsUpdated: dataValuesToCreate.length,
+      syncedAt,
+    })
+  } catch (error) {
+    console.error('Error submitting manual data:', error)
+    res.status(500).json({ error: 'Failed to submit manual data' })
+  }
+})
+
+/**
+ * GET /api/integrations/:id/data
+ * Get the latest data values for an integration
+ */
+integrationRouter.get('/:id/data', async (req: Request, res: Response) => {
+  try {
+    const integration = await prisma.integration.findUnique({
+      where: { id: req.params.id },
+      include: { dataFields: true },
+    })
+
+    if (!integration) {
+      res.status(404).json({ error: 'Integration not found' })
+      return
+    }
+
+    // Get the latest value for each data field
+    const latestValues: Record<string, { value: unknown; syncedAt: Date }> = {}
+
+    for (const field of integration.dataFields) {
+      const latestValue = await prisma.dataValue.findFirst({
+        where: { dataFieldId: field.id },
+        orderBy: { syncedAt: 'desc' },
+      })
+
+      if (latestValue) {
+        latestValues[field.id] = {
+          value: latestValue.value,
+          syncedAt: latestValue.syncedAt,
+        }
+      }
+    }
+
+    res.json({
+      integrationId: integration.id,
+      integrationName: integration.name,
+      fields: integration.dataFields.map(f => ({
+        id: f.id,
+        name: f.name,
+        dataType: f.dataType,
+        latestValue: latestValues[f.id]?.value ?? null,
+        lastUpdated: latestValues[f.id]?.syncedAt ?? null,
+      })),
+    })
+  } catch (error) {
+    console.error('Error fetching integration data:', error)
+    res.status(500).json({ error: 'Failed to fetch integration data' })
+  }
+})
+
+/**
  * Helper to get nested value from an object using dot notation
  * e.g., getNestedValue({ data: { total: 100 } }, "data.total") => 100
  */

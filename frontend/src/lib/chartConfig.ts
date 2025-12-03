@@ -15,8 +15,8 @@ import {
   Tooltip,
   Legend,
   Filler,
-  ChartOptions,
 } from 'chart.js'
+import type { ChartOptions } from 'chart.js'
 
 // Register Chart.js components
 ChartJS.register(
@@ -32,10 +32,10 @@ ChartJS.register(
   Filler
 )
 
-// Color palette
+// Color palette - Checkin brand colors
 export const chartColors = {
-  primary: '#3B82F6',     // Blue-500
-  primaryLight: '#93C5FD', // Blue-300
+  primary: '#7C3AED',     // Violet-600
+  primaryLight: '#C4B5FD', // Violet-300
   success: '#10B981',     // Emerald-500
   warning: '#F59E0B',     // Amber-500
   danger: '#EF4444',      // Red-500

@@ -101,7 +101,7 @@ export function ChartWidget({
                   onClick={() => handlePeriodChange(period)}
                   className={`px-2 py-1 text-xs font-medium border ${
                     selectedPeriod === period
-                      ? 'bg-blue-500 text-white border-blue-500'
+                      ? 'bg-violet-500 text-white border-violet-500'
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                   } ${
                     period === periods[0] ? 'rounded-l-md' : ''

@@ -46,7 +46,7 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
   const getProgressColor = (): string => {
     if (kpi.onTrack === true) return 'bg-green-500'
     if (kpi.onTrack === false) return 'bg-amber-500'
-    return 'bg-blue-500'
+    return 'bg-violet-500'
   }
 
   // Get direction arrow
@@ -73,7 +73,7 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
           <button
             onClick={handleRecalculate}
             disabled={recalculate.isPending}
-            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+            className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded"
             title="Recalculate"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,7 +147,7 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
           {kpi.sources.map(source => (
             <span
               key={source.id}
-              className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs"
+              className="px-2 py-0.5 bg-violet-50 text-violet-700 rounded text-xs"
             >
               {source.alias || source.dataField.name}
             </span>

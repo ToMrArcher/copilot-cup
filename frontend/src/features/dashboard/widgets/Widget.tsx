@@ -77,7 +77,7 @@ export function Widget({
       <div className="flex-1 p-4 flex items-center justify-center">
         {isLoading ? (
           <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500" />
           </div>
         ) : error ? (
           <div className="text-center text-red-500 text-sm">

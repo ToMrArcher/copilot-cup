@@ -4,22 +4,78 @@ import { DashboardPage } from './features/dashboard/DashboardPage'
 import { KpiPage } from './features/kpi/KpiPage'
 import { IntegrationsPage } from './features/integrations/IntegrationsPage'
 import { IntegrationWizard } from './features/integrations/IntegrationWizard'
-import { AuthPage } from './features/auth/AuthPage'
+import { AuthPage, AuthProvider, ProtectedRoute, ProfilePage, AdminUsersPage } from './features/auth'
 import { SharingPage } from './features/sharing/SharingPage'
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<DashboardPage />} />
-          <Route path="kpis" element={<KpiPage />} />
-          <Route path="integrations" element={<IntegrationsPage />} />
-          <Route path="integrations/new" element={<IntegrationWizard />} />
-          <Route path="auth" element={<AuthPage />} />
-          <Route path="sharing" element={<SharingPage />} />
-        </Route>
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            {/* Protected Routes */}
+            <Route
+              index
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="kpis"
+              element={
+                <ProtectedRoute>
+                  <KpiPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="integrations"
+              element={
+                <ProtectedRoute>
+                  <IntegrationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="integrations/new"
+              element={
+                <ProtectedRoute>
+                  <IntegrationWizard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="sharing"
+              element={
+                <ProtectedRoute>
+                  <SharingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="admin/users"
+              element={
+                <ProtectedRoute requiredRole="ADMIN">
+                  <AdminUsersPage />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Public Routes */}
+            <Route path="auth" element={<AuthPage />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   )
 }

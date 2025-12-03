@@ -47,7 +47,7 @@ export function SelectTypeStep({ state, updateState }: SelectTypeStepProps) {
           value={state.name}
           onChange={e => updateState({ name: e.target.value })}
           placeholder="e.g., Sales API, Monthly KPIs"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-violet-500 focus:border-violet-500"
         />
       </div>
 
@@ -59,7 +59,7 @@ export function SelectTypeStep({ state, updateState }: SelectTypeStepProps) {
             onClick={() => updateState({ type })}
             className={`p-4 rounded-lg border-2 text-left transition-all ${
               state.type === type
-                ? 'border-indigo-600 bg-indigo-50'
+                ? 'border-violet-600 bg-violet-50'
                 : 'border-gray-200 hover:border-gray-300'
             }`}
           >

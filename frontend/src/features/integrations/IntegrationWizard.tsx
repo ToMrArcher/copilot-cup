@@ -179,9 +179,9 @@ export function IntegrationWizard() {
                 <div
                   className={`flex h-10 w-10 items-center justify-center rounded-full ${
                     index < currentStepIndex
-                      ? 'bg-indigo-600'
+                      ? 'bg-violet-600'
                       : index === currentStepIndex
-                      ? 'border-2 border-indigo-600 bg-white'
+                      ? 'border-2 border-violet-600 bg-white'
                       : 'border-2 border-gray-300 bg-white'
                   }`}
                 >
@@ -196,7 +196,7 @@ export function IntegrationWizard() {
                   ) : (
                     <span
                       className={
-                        index === currentStepIndex ? 'text-indigo-600' : 'text-gray-500'
+                        index === currentStepIndex ? 'text-violet-600' : 'text-gray-500'
                       }
                     >
                       {index + 1}
@@ -206,7 +206,7 @@ export function IntegrationWizard() {
                 {index !== steps.length - 1 && (
                   <div
                     className={`h-0.5 w-full ${
-                      index < currentStepIndex ? 'bg-indigo-600' : 'bg-gray-300'
+                      index < currentStepIndex ? 'bg-violet-600' : 'bg-gray-300'
                     }`}
                   />
                 )}
@@ -254,7 +254,7 @@ export function IntegrationWizard() {
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+            className="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700 disabled:opacity-50"
           >
             {isSubmitting ? 'Creating...' : 'Create Integration'}
           </button>
@@ -262,7 +262,7 @@ export function IntegrationWizard() {
           <button
             onClick={goNext}
             disabled={!canProceed()}
-            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Continue
           </button>

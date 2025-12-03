@@ -1,10 +1,12 @@
 import express from 'express'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 import dotenv from 'dotenv'
 import { healthRouter } from './modules/health'
 import { integrationRouter } from './modules/integrations/integration.router'
 import { kpiRouter } from './modules/kpi'
 import { dashboardRouter } from './modules/dashboard/dashboard.router'
+import { authRouter } from './modules/auth/auth.router'
 
 // Load environment variables
 dotenv.config()
@@ -13,19 +15,19 @@ const app = express()
 const PORT = process.env.PORT || 4000
 
 // Middleware
-app.use(cors())
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true, // Allow cookies
+}))
 app.use(express.json())
+app.use(cookieParser())
 
 // Routes
 app.use('/health', healthRouter)
+app.use('/api/auth', authRouter)
 app.use('/api/integrations', integrationRouter)
 app.use('/api/kpis', kpiRouter)
 app.use('/api/dashboards', dashboardRouter)
-
-// Placeholder routes for other feature modules
-app.get('/api/auth', (_req, res) => {
-  res.json({ message: 'Auth module - coming soon' })
-})
 
 app.get('/api/sharing', (_req, res) => {
   res.json({ message: 'Sharing module - coming soon' })

@@ -1,0 +1,252 @@
+/**
+ * WidgetPicker Component
+ * Modal to add a new widget with KPI and type selection
+ */
+
+import { useState } from 'react'
+import { useKpis } from '../../hooks/useKpis'
+import { useAddWidget } from '../../hooks/useDashboards'
+import type { WidgetType, WidgetPosition, WidgetConfig } from '../../types/dashboard'
+
+interface WidgetPickerProps {
+  dashboardId: string
+  isOpen: boolean
+  onClose: () => void
+}
+
+const widgetTypes: Array<{ type: WidgetType; label: string; description: string; icon: string }> = [
+  { type: 'number', label: 'Number', description: 'Large value display', icon: '123' },
+  { type: 'stat', label: 'Stat', description: 'Value with trend comparison', icon: '📈' },
+  { type: 'gauge', label: 'Gauge', description: 'Circular progress indicator', icon: '⏱️' },
+  { type: 'line', label: 'Line Chart', description: 'Time-series line graph', icon: '📉' },
+  { type: 'bar', label: 'Bar Chart', description: 'Categorical bar graph', icon: '📊' },
+  { type: 'area', label: 'Area Chart', description: 'Filled area graph', icon: '📈' },
+]
+
+const defaultPositions: Record<WidgetType, WidgetPosition> = {
+  number: { x: 0, y: 0, w: 3, h: 2 },
+  stat: { x: 0, y: 0, w: 3, h: 2 },
+  gauge: { x: 0, y: 0, w: 3, h: 3 },
+  line: { x: 0, y: 0, w: 6, h: 3 },
+  bar: { x: 0, y: 0, w: 6, h: 3 },
+  area: { x: 0, y: 0, w: 6, h: 3 },
+}
+
+export function WidgetPicker({ dashboardId, isOpen, onClose }: WidgetPickerProps) {
+  const { data: kpis, isLoading: kpisLoading } = useKpis()
+  const addWidget = useAddWidget()
+  
+  const [step, setStep] = useState<'type' | 'kpi' | 'config'>('type')
+  const [selectedType, setSelectedType] = useState<WidgetType | null>(null)
+  const [selectedKpiId, setSelectedKpiId] = useState<string | null>(null)
+  const [config, setConfig] = useState<WidgetConfig>({
+    format: 'number',
+    showTarget: true,
+    period: '30d',
+  })
+
+  const handleTypeSelect = (type: WidgetType) => {
+    setSelectedType(type)
+    setStep('kpi')
+  }
+
+  const handleKpiSelect = (kpiId: string) => {
+    setSelectedKpiId(kpiId)
+    setStep('config')
+  }
+
+  const handleCreate = async () => {
+    if (!selectedType || !selectedKpiId) return
+
+    try {
+      await addWidget.mutateAsync({
+        dashboardId,
+        data: {
+          type: selectedType,
+          kpiId: selectedKpiId,
+          config,
+          position: defaultPositions[selectedType],
+        },
+      })
+      handleClose()
+    } catch (err) {
+      console.error('Failed to add widget:', err)
+    }
+  }
+
+  const handleClose = () => {
+    setStep('type')
+    setSelectedType(null)
+    setSelectedKpiId(null)
+    setConfig({ format: 'number', showTarget: true, period: '30d' })
+    onClose()
+  }
+
+  const handleBack = () => {
+    if (step === 'config') setStep('kpi')
+    else if (step === 'kpi') setStep('type')
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex items-center justify-center min-h-screen px-4">
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={handleClose} />
+        
+        <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full">
+          {/* Header */}
+          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {step !== 'type' && (
+                <button onClick={handleBack} className="text-gray-500 hover:text-gray-700">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+              )}
+              <h3 className="text-lg font-medium text-gray-900">
+                {step === 'type' && 'Select Widget Type'}
+                {step === 'kpi' && 'Select KPI'}
+                {step === 'config' && 'Configure Widget'}
+              </h3>
+            </div>
+            <button onClick={handleClose} className="text-gray-400 hover:text-gray-500">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="p-6">
+            {/* Step 1: Select Type */}
+            {step === 'type' && (
+              <div className="grid grid-cols-2 gap-3">
+                {widgetTypes.map(({ type, label, description, icon }) => (
+                  <button
+                    key={type}
+                    onClick={() => handleTypeSelect(type)}
+                    className="p-4 border rounded-lg text-left hover:border-violet-500 hover:bg-violet-50 transition-colors"
+                  >
+                    <div className="text-2xl mb-2">{icon}</div>
+                    <div className="font-medium text-gray-900">{label}</div>
+                    <div className="text-sm text-gray-500">{description}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Step 2: Select KPI */}
+            {step === 'kpi' && (
+              <div>
+                {kpisLoading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500" />
+                  </div>
+                ) : kpis && kpis.length > 0 ? (
+                  <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {kpis.map((kpi) => (
+                      <button
+                        key={kpi.id}
+                        onClick={() => handleKpiSelect(kpi.id)}
+                        className={`w-full p-4 border rounded-lg text-left hover:border-violet-500 hover:bg-violet-50 transition-colors ${
+                          selectedKpiId === kpi.id ? 'border-violet-500 bg-violet-50' : ''
+                        }`}
+                      >
+                        <div className="font-medium text-gray-900">{kpi.name}</div>
+                        {kpi.description && (
+                          <div className="text-sm text-gray-500">{kpi.description}</div>
+                        )}
+                        <div className="text-sm text-gray-400 mt-1">
+                          Formula: <code className="bg-gray-100 px-1 rounded">{kpi.formula}</code>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    No KPIs available. Create a KPI first.
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Step 3: Configure */}
+            {step === 'config' && (
+              <div className="space-y-4">
+                {/* Format */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Value Format
+                  </label>
+                  <select
+                    value={config.format || 'number'}
+                    onChange={(e) => setConfig({ ...config, format: e.target.value as WidgetConfig['format'] })}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2"
+                  >
+                    <option value="number">Number</option>
+                    <option value="currency">Currency ($)</option>
+                    <option value="percent">Percentage (%)</option>
+                  </select>
+                </div>
+
+                {/* Show Target */}
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="showTarget"
+                    checked={config.showTarget ?? true}
+                    onChange={(e) => setConfig({ ...config, showTarget: e.target.checked })}
+                    className="h-4 w-4 text-violet-600 rounded"
+                  />
+                  <label htmlFor="showTarget" className="ml-2 text-sm text-gray-700">
+                    Show target value
+                  </label>
+                </div>
+
+                {/* Period (for charts) */}
+                {['line', 'bar', 'area', 'stat'].includes(selectedType || '') && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Time Period
+                    </label>
+                    <select
+                      value={config.period || '30d'}
+                      onChange={(e) => setConfig({ ...config, period: e.target.value })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2"
+                    >
+                      <option value="7d">Last 7 days</option>
+                      <option value="30d">Last 30 days</option>
+                      <option value="90d">Last 90 days</option>
+                      <option value="1y">Last year</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          {step === 'config' && (
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-2">
+              <button
+                onClick={handleClose}
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={!selectedType || !selectedKpiId || addWidget.isPending}
+                className="px-4 py-2 text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 rounded-md disabled:opacity-50"
+              >
+                {addWidget.isPending ? 'Adding...' : 'Add Widget'}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

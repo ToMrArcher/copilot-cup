@@ -9,8 +9,39 @@ import type {
   FormulaValidationResponse,
   RecalculateResponse,
 } from '../types/kpi'
+import type {
+  Dashboard,
+  DashboardListItem,
+  CreateDashboardRequest,
+  UpdateDashboardRequest,
+  Widget,
+  CreateWidgetRequest,
+  UpdateWidgetRequest,
+  UpdateLayoutRequest,
+  KpiHistoryResponse,
+} from '../types/dashboard'
+import type {
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
+  GetMeResponse,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
+  ListUsersResponse,
+  UpdateRoleRequest,
+  UpdateRoleResponse,
+} from '../types/auth'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+
+// Event for handling 401 unauthorized responses
+type AuthEventHandler = () => void
+let onUnauthorized: AuthEventHandler | null = null
+
+export function setOnUnauthorized(handler: AuthEventHandler | null) {
+  onUnauthorized = handler
+}
 
 // Generic fetch wrapper with error handling
 async function fetchApi<T>(
@@ -19,6 +50,7 @@ async function fetchApi<T>(
 ): Promise<T> {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
+    credentials: 'include', // Always include cookies for auth
     headers: {
       'Content-Type': 'application/json',
       ...options?.headers,
@@ -26,6 +58,11 @@ async function fetchApi<T>(
   })
 
   if (!response.ok) {
+    // Handle 401 Unauthorized
+    if (response.status === 401 && onUnauthorized) {
+      onUnauthorized()
+    }
+    
     const error = await response.json().catch(() => ({ message: 'An error occurred' }))
     throw new Error(error.message || error.error || `HTTP error! status: ${response.status}`)
   }
@@ -36,6 +73,50 @@ async function fetchApi<T>(
   }
 
   return response.json()
+}
+
+// ============ Authentication API ============
+
+export const authApi = {
+  // Login with email and password
+  login: (data: LoginRequest) =>
+    fetchApi<LoginResponse>('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Register a new user
+  register: (data: RegisterRequest) =>
+    fetchApi<RegisterResponse>('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Logout current user
+  logout: () =>
+    fetchApi<{ message: string }>('/api/auth/logout', {
+      method: 'POST',
+    }),
+
+  // Get current authenticated user
+  getMe: () => fetchApi<GetMeResponse>('/api/auth/me'),
+
+  // Update current user profile
+  updateProfile: (data: UpdateProfileRequest) =>
+    fetchApi<UpdateProfileResponse>('/api/auth/me', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  // List all users (admin only)
+  listUsers: () => fetchApi<ListUsersResponse>('/api/auth/users'),
+
+  // Update user role (admin only)
+  updateUserRole: (userId: string, data: UpdateRoleRequest) =>
+    fetchApi<UpdateRoleResponse>(`/api/auth/users/${userId}/role`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
 }
 
 // ============ Integrations API ============
@@ -101,6 +182,30 @@ export const integrationsApi = {
   // Discover fields from API
   discoverFields: (id: string) =>
     fetchApi<FieldSchema[]>(`/api/integrations/${id}/discover-fields`),
+
+  // Get data values for an integration (latest values for each field)
+  getData: (id: string) =>
+    fetchApi<{
+      integrationId: string
+      integrationName: string
+      fields: {
+        id: string
+        name: string
+        dataType: string
+        latestValue: unknown
+        lastUpdated: string | null
+      }[]
+    }>(`/api/integrations/${id}/data`),
+
+  // Submit manual data values
+  submitData: (id: string, values: Record<string, unknown>) =>
+    fetchApi<{ success: boolean; fieldsUpdated: number; syncedAt: string }>(
+      `/api/integrations/${id}/data`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ values }),
+      }
+    ),
 }
 
 // ============ Data Fields API ============
@@ -199,4 +304,70 @@ export const kpisApi = {
   // Get available fields for KPI creation
   getAvailableFields: () =>
     fetchApi<AvailableFieldsResponse>('/api/kpis/available-fields'),
+
+  // Get KPI history for charts
+  getHistory: (id: string, period?: string, interval?: string) => {
+    const params = new URLSearchParams()
+    if (period) params.set('period', period)
+    if (interval) params.set('interval', interval)
+    const query = params.toString()
+    return fetchApi<KpiHistoryResponse>(`/api/kpis/${id}/history${query ? `?${query}` : ''}`)
+  },
+}
+
+// ============ Dashboards API ============
+
+export const dashboardsApi = {
+  // Get all dashboards
+  getAll: () => fetchApi<{ dashboards: DashboardListItem[] }>('/api/dashboards'),
+
+  // Get single dashboard with widgets
+  getById: (id: string) => fetchApi<Dashboard>(`/api/dashboards/${id}`),
+
+  // Create new dashboard
+  create: (data: CreateDashboardRequest) =>
+    fetchApi<Dashboard>('/api/dashboards', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Update dashboard
+  update: (id: string, data: UpdateDashboardRequest) =>
+    fetchApi<Dashboard>(`/api/dashboards/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  // Delete dashboard
+  delete: (id: string) =>
+    fetchApi<void>(`/api/dashboards/${id}`, {
+      method: 'DELETE',
+    }),
+
+  // Update layout (batch widget positions)
+  updateLayout: (id: string, data: UpdateLayoutRequest) =>
+    fetchApi<Dashboard>(`/api/dashboards/${id}/layout`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  // Add widget
+  addWidget: (dashboardId: string, data: CreateWidgetRequest) =>
+    fetchApi<Widget>(`/api/dashboards/${dashboardId}/widgets`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Update widget
+  updateWidget: (dashboardId: string, widgetId: string, data: UpdateWidgetRequest) =>
+    fetchApi<Widget>(`/api/dashboards/${dashboardId}/widgets/${widgetId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  // Delete widget
+  deleteWidget: (dashboardId: string, widgetId: string) =>
+    fetchApi<void>(`/api/dashboards/${dashboardId}/widgets/${widgetId}`, {
+      method: 'DELETE',
+    }),
 }

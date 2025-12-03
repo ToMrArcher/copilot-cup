@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { IntegrationCard } from './IntegrationCard'
+import { ManualDataEntryModal } from './ManualDataEntryModal'
 import type { Integration } from '../../types/integration'
 import {
   useIntegrations,
@@ -40,9 +41,17 @@ export function IntegrationList() {
   const { data: apiIntegrations, isLoading, error } = useIntegrations()
   const deleteIntegration = useDeleteIntegration()
   const [actionId, setActionId] = useState<string | null>(null)
+  const [dataEntryIntegration, setDataEntryIntegration] = useState<Integration | null>(null)
 
   // Use API data if available, otherwise fall back to mock data for development
   const integrations = apiIntegrations || mockIntegrations
+
+  const handleEnterData = (id: string) => {
+    const integration = integrations.find(i => i.id === id)
+    if (integration) {
+      setDataEntryIntegration(integration)
+    }
+  }
 
   const handleSync = async (id: string) => {
     setActionId(id)
@@ -84,7 +93,7 @@ export function IntegrationList() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
       </div>
     )
   }
@@ -102,7 +111,7 @@ export function IntegrationList() {
         </div>
         <Link
           to="/integrations/new"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-violet-600 hover:bg-violet-700"
         >
           + Add Integration
         </Link>
@@ -115,7 +124,7 @@ export function IntegrationList() {
           <p className="mt-2 text-gray-500">Get started by adding your first data source.</p>
           <Link
             to="/integrations/new"
-            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200"
+            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-violet-700 bg-violet-100 hover:bg-violet-200"
           >
             + Add Integration
           </Link>
@@ -126,7 +135,7 @@ export function IntegrationList() {
             <div key={integration.id} className="relative">
               {actionId === integration.id && (
                 <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 rounded-lg">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
                 </div>
               )}
               <IntegrationCard
@@ -135,10 +144,20 @@ export function IntegrationList() {
                 onDelete={handleDelete}
                 onSync={handleSync}
                 onTest={handleTest}
+                onEnterData={handleEnterData}
               />
             </div>
           ))}
         </div>
+      )}
+
+      {/* Manual Data Entry Modal */}
+      {dataEntryIntegration && (
+        <ManualDataEntryModal
+          integration={dataEntryIntegration}
+          isOpen={true}
+          onClose={() => setDataEntryIntegration(null)}
+        />
       )}
     </div>
   )

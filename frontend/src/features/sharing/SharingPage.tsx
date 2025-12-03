@@ -7,7 +7,7 @@ export function SharingPage() {
           Manage external sharing links for your dashboards and KPIs.
         </p>
         <div className="mt-6">
-          <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+          <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-violet-600 hover:bg-violet-700">
             + Create Share Link
           </button>
         </div>

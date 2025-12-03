@@ -84,7 +84,7 @@ export function MapFieldsStep({
           <button
             onClick={onDiscover}
             disabled={isDiscovering}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+            className="px-4 py-2 bg-violet-600 text-white rounded-md hover:bg-violet-700 disabled:opacity-50"
           >
             {isDiscovering ? 'Discovering...' : 'Discover Fields'}
           </button>
@@ -104,14 +104,14 @@ export function MapFieldsStep({
                 <label
                   key={field.name}
                   className={`flex items-center p-2 rounded cursor-pointer transition-colors ${
-                    isSelected ? 'bg-indigo-100' : 'hover:bg-gray-100'
+                    isSelected ? 'bg-violet-100' : 'hover:bg-gray-100'
                   }`}
                 >
                   <input
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => toggleField(field)}
-                    className="h-4 w-4 text-indigo-600 rounded border-gray-300"
+                    className="h-4 w-4 text-violet-600 rounded border-gray-300"
                   />
                   <span className="ml-3 flex-1">
                     <span className="font-medium text-gray-900">{field.name}</span>
@@ -225,7 +225,7 @@ export function MapFieldsStep({
           <div className="mt-3 flex gap-2">
             <button
               onClick={addCustomField}
-              className="px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              className="px-3 py-1 bg-violet-600 text-white rounded-md hover:bg-violet-700"
             >
               Add
             </button>
@@ -240,7 +240,7 @@ export function MapFieldsStep({
       ) : (
         <button
           onClick={() => setShowAddCustom(true)}
-          className="text-indigo-600 hover:text-indigo-800 text-sm"
+          className="text-violet-600 hover:text-violet-800 text-sm"
         >
           + Add custom field
         </button>

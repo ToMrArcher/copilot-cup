@@ -147,10 +147,10 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
               <div key={s} className="flex-1">
                 <div
                   className={`h-1 rounded-full ${
-                    s <= step ? 'bg-blue-600' : 'bg-gray-200'
+                    s <= step ? 'bg-violet-600' : 'bg-gray-200'
                   }`}
                 />
-                <div className={`text-xs mt-1 ${s === step ? 'text-blue-600 font-medium' : 'text-gray-400'}`}>
+                <div className={`text-xs mt-1 ${s === step ? 'text-violet-600 font-medium' : 'text-gray-400'}`}>
                   {s === 1 && 'Basic Info'}
                   {s === 2 && 'Data Sources'}
                   {s === 3 && 'Formula'}
@@ -175,7 +175,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="e.g., Revenue per Employee"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
                 />
               </div>
               <div>
@@ -187,7 +187,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                   onChange={e => setDescription(e.target.value)}
                   placeholder="Optional description of what this KPI measures"
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
                 />
               </div>
             </div>
@@ -202,7 +202,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
 
               {fieldsLoading ? (
                 <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600" />
                 </div>
               ) : availableFields?.integrations.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
@@ -223,14 +223,14 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                             <div
                               key={field.id}
                               className={`px-4 py-3 flex items-center gap-4 ${
-                                selected ? 'bg-blue-50' : 'hover:bg-gray-50'
+                                selected ? 'bg-violet-50' : 'hover:bg-gray-50'
                               }`}
                             >
                               <input
                                 type="checkbox"
                                 checked={!!selected}
                                 onChange={() => handleSourceToggle(field, integration)}
-                                className="w-4 h-4 text-blue-600 rounded"
+                                className="w-4 h-4 text-violet-600 rounded"
                               />
                               <div className="flex-1">
                                 <div className="font-medium text-gray-900">{field.name}</div>
@@ -247,7 +247,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                                   value={selected.alias}
                                   onChange={e => handleAliasChange(field.id, e.target.value)}
                                   placeholder="alias"
-                                  className="w-32 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                                  className="w-32 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-violet-500"
                                 />
                               )}
                             </div>
@@ -260,11 +260,11 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
               )}
 
               {selectedSources.length > 0 && (
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                  <div className="text-sm font-medium text-blue-700">
+                <div className="mt-4 p-3 bg-violet-50 rounded-lg">
+                  <div className="text-sm font-medium text-violet-700">
                     Selected: {selectedSources.length} field(s)
                   </div>
-                  <div className="text-xs text-blue-600 mt-1">
+                  <div className="text-xs text-violet-600 mt-1">
                     Variables: {selectedSources.map(s => s.alias).join(', ')}
                   </div>
                 </div>
@@ -287,7 +287,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                     setFormulaError(null)
                   }}
                   placeholder="e.g., revenue / employees"
-                  className={`w-full px-3 py-2 border rounded-lg font-mono focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-full px-3 py-2 border rounded-lg font-mono focus:ring-2 focus:ring-violet-500 ${
                     formulaError ? 'border-red-300' : 'border-gray-300'
                   }`}
                 />
@@ -304,7 +304,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                       key={s.dataFieldId}
                       type="button"
                       onClick={() => setFormula(f => f + (f && !f.endsWith(' ') ? ' ' : '') + s.alias)}
-                      className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200"
+                      className="px-2 py-1 bg-violet-100 text-violet-700 rounded text-sm hover:bg-violet-200"
                     >
                       {s.alias}
                     </button>
@@ -350,7 +350,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                   value={targetValue}
                   onChange={e => setTargetValue(e.target.value)}
                   placeholder="e.g., 100000"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500"
                 />
               </div>
 
@@ -365,7 +365,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                       name="direction"
                       checked={targetDirection === 'increase'}
                       onChange={() => setTargetDirection('increase')}
-                      className="w-4 h-4 text-blue-600"
+                      className="w-4 h-4 text-violet-600"
                     />
                     <span className="text-gray-700">↑ Increase (higher is better)</span>
                   </label>
@@ -375,7 +375,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                       name="direction"
                       checked={targetDirection === 'decrease'}
                       onChange={() => setTargetDirection('decrease')}
-                      className="w-4 h-4 text-blue-600"
+                      className="w-4 h-4 text-violet-600"
                     />
                     <span className="text-gray-700">↓ Decrease (lower is better)</span>
                   </label>
@@ -389,7 +389,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                 <select
                   value={targetPeriod}
                   onChange={e => setTargetPeriod(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500"
                 >
                   <option value="daily">Daily</option>
                   <option value="weekly">Weekly</option>
@@ -430,7 +430,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
             <button
               onClick={handleNext}
               disabled={!canProceed()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
             </button>
