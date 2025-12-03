@@ -1,0 +1,96 @@
+services:
+  # ===========================================
+  # Frontend - React Application
+  # ===========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:4000
+    depends_on:
+      - backend
+    networks:
+      - kpi-network
+
+  # ===========================================
+  # Backend - Express API
+  # ===========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=4000
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/kpi_dashboard
+      - JWT_SECRET=dev-jwt-secret-change-in-production
+      - SHARE_LINK_SECRET=dev-share-secret-change-in-production
+      - ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - kpi-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ===========================================
+  # PostgreSQL Database
+  # ===========================================
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=kpi_dashboard
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - kpi-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d kpi_dashboard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ===========================================
+  # Dummy Data Server - For Testing Integrations
+  # ===========================================
+  dummy-server:
+    build:
+      context: ./dummy-server
+      dockerfile: Dockerfile
+    ports:
+      - "5050:5050"
+    environment:
+      - PORT=5050
+      - REQUIRE_AUTH=false
+    networks:
+      - kpi-network
+
+networks:
+  kpi-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

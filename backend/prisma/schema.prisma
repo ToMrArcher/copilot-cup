@@ -1,0 +1,152 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// User & Authentication
+// ==========================================
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      Role     @default(VIEWER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  dashboards Dashboard[]
+  shareLinks ShareLink[]
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+// ==========================================
+// Integrations (Data Sources)
+// ==========================================
+
+model Integration {
+  id        String          @id @default(cuid())
+  name      String
+  type      IntegrationType
+  config    Json            // Encrypted configuration
+  status    String          @default("pending")
+  lastSync  DateTime?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  dataFields DataField[]
+  kpis       Kpi[]
+}
+
+enum IntegrationType {
+  API
+  MANUAL
+  WEBHOOK
+}
+
+model DataField {
+  id            String      @id @default(cuid())
+  integrationId String
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  name          String
+  path          String      // JSON path or field reference
+  dataType      String      // string, number, date, etc.
+  createdAt     DateTime    @default(now())
+
+  kpiSources KpiSource[]
+}
+
+// ==========================================
+// KPIs
+// ==========================================
+
+model Kpi {
+  id              String      @id @default(cuid())
+  name            String
+  description     String?
+  formula         String      // Formula expression
+  integrationId   String?
+  integration     Integration? @relation(fields: [integrationId], references: [id])
+  currentValue    Float?
+  targetValue     Float?
+  targetDirection String?     // increase, decrease
+  targetPeriod    String?     // daily, weekly, monthly, quarterly, yearly
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  sources    KpiSource[]
+  widgets    Widget[]
+  shareLinks ShareLink[]
+}
+
+model KpiSource {
+  id          String    @id @default(cuid())
+  kpiId       String
+  kpi         Kpi       @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  dataFieldId String
+  dataField   DataField @relation(fields: [dataFieldId], references: [id], onDelete: Cascade)
+  alias       String?   // Variable name in formula
+  createdAt   DateTime  @default(now())
+}
+
+// ==========================================
+// Dashboards & Widgets
+// ==========================================
+
+model Dashboard {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id])
+  layout    Json?    // Grid layout configuration
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  widgets    Widget[]
+  shareLinks ShareLink[]
+}
+
+model Widget {
+  id          String    @id @default(cuid())
+  dashboardId String
+  dashboard   Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+  kpiId       String?
+  kpi         Kpi?      @relation(fields: [kpiId], references: [id])
+  type        String    // chart, number, gauge, etc.
+  config      Json?     // Widget-specific configuration
+  position    Json      // { x, y, w, h }
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ==========================================
+// Sharing
+// ==========================================
+
+model ShareLink {
+  id           String     @id @default(cuid())
+  token        String     @unique
+  resourceType String     // dashboard, kpi
+  dashboardId  String?
+  dashboard    Dashboard? @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+  kpiId        String?
+  kpi          Kpi?       @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  createdById  String
+  createdBy    User       @relation(fields: [createdById], references: [id])
+  showTarget   Boolean    @default(true)
+  expiresAt    DateTime?
+  active       Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+}
