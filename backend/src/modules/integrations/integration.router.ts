@@ -277,6 +277,42 @@ integrationRouter.post('/:id/sync', async (req: Request, res: Response) => {
 
     const result = await adapter.fetchData(config, fieldPaths)
 
+    if (result.success && result.data.length > 0) {
+      // Store synced values for each data field
+      const syncedAt = new Date()
+      const dataValuesToCreate: { dataFieldId: string; value: unknown; syncedAt: Date }[] = []
+
+      for (const field of integration.dataFields) {
+        // Extract the value for this field from each row
+        // Aggregate all values for the field path
+        const values = result.data.map(row => {
+          // Navigate the field path (e.g., "revenue" or "data.total")
+          return getNestedValue(row, field.path)
+        }).filter(v => v !== undefined && v !== null)
+
+        if (values.length > 0) {
+          // Store as single value (first) or array depending on data
+          const valueToStore = values.length === 1 ? values[0] : values
+          dataValuesToCreate.push({
+            dataFieldId: field.id,
+            value: valueToStore,
+            syncedAt,
+          })
+        }
+      }
+
+      // Bulk create data values
+      if (dataValuesToCreate.length > 0) {
+        await prisma.dataValue.createMany({
+          data: dataValuesToCreate.map(dv => ({
+            dataFieldId: dv.dataFieldId,
+            value: dv.value as object,
+            syncedAt: dv.syncedAt,
+          })),
+        })
+      }
+    }
+
     // Update last sync time and status
     await prisma.integration.update({
       where: { id: req.params.id },
@@ -289,6 +325,7 @@ integrationRouter.post('/:id/sync', async (req: Request, res: Response) => {
     res.json({
       success: result.success,
       rowCount: result.data.length,
+      fieldsUpdated: integration.dataFields.length,
       syncedAt: result.fetchedAt,
       error: result.error,
     })
@@ -297,6 +334,28 @@ integrationRouter.post('/:id/sync', async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to sync integration' })
   }
 })
+
+/**
+ * Helper to get nested value from an object using dot notation
+ * e.g., getNestedValue({ data: { total: 100 } }, "data.total") => 100
+ */
+function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
+  const parts = path.split('.')
+  let current: unknown = obj
+  
+  for (const part of parts) {
+    if (current === null || current === undefined) {
+      return undefined
+    }
+    if (typeof current === 'object') {
+      current = (current as Record<string, unknown>)[part]
+    } else {
+      return undefined
+    }
+  }
+  
+  return current
+}
 
 /**
  * GET /api/integrations/:id/preview

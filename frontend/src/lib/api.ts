@@ -1,4 +1,14 @@
 import type { Integration, DataField, IntegrationType, FieldSchema } from '../types/integration'
+import type {
+  Kpi,
+  KpiListResponse,
+  CreateKpiRequest,
+  UpdateKpiRequest,
+  AvailableFieldsResponse,
+  FormulaValidationRequest,
+  FormulaValidationResponse,
+  RecalculateResponse,
+} from '../types/kpi'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
@@ -142,4 +152,51 @@ export const dataFieldsApi = {
       method: 'POST',
       body: JSON.stringify({ fields }),
     }),
+}
+
+// ============ KPIs API ============
+
+export const kpisApi = {
+  // Get all KPIs with calculated values
+  getAll: () => fetchApi<KpiListResponse>('/api/kpis'),
+
+  // Get single KPI
+  getById: (id: string) => fetchApi<Kpi>(`/api/kpis/${id}`),
+
+  // Create new KPI
+  create: (data: CreateKpiRequest) =>
+    fetchApi<Kpi>('/api/kpis', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Update KPI
+  update: (id: string, data: UpdateKpiRequest) =>
+    fetchApi<Kpi>(`/api/kpis/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  // Delete KPI
+  delete: (id: string) =>
+    fetchApi<void>(`/api/kpis/${id}`, {
+      method: 'DELETE',
+    }),
+
+  // Force recalculate KPI value
+  recalculate: (id: string) =>
+    fetchApi<RecalculateResponse>(`/api/kpis/${id}/recalculate`, {
+      method: 'POST',
+    }),
+
+  // Validate a formula
+  validateFormula: (data: FormulaValidationRequest) =>
+    fetchApi<FormulaValidationResponse>('/api/kpis/validate-formula', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Get available fields for KPI creation
+  getAvailableFields: () =>
+    fetchApi<AvailableFieldsResponse>('/api/kpis/available-fields'),
 }

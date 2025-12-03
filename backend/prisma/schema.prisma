@@ -66,6 +66,18 @@ model DataField {
   createdAt     DateTime    @default(now())
 
   kpiSources KpiSource[]
+  values     DataValue[]
+}
+
+// Stores synced values from integrations
+model DataValue {
+  id          String    @id @default(cuid())
+  dataFieldId String
+  dataField   DataField @relation(fields: [dataFieldId], references: [id], onDelete: Cascade)
+  value       Json      // Actual value (supports any type)
+  syncedAt    DateTime  @default(now())
+
+  @@index([dataFieldId, syncedAt])
 }
 
 // ==========================================
