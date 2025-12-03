@@ -104,32 +104,109 @@ Caching: Lett caching-lag for å unngå å kalle eksterne APIer unødvendig.
 Rate-limit-håndtering: Unngå overdrevent mange kall til hvert API.
 
 ## Tech Stack
-- Typescript
-- Javascript
-- React
-- ChartJS
-- PostgresQL
+
+### Frontend
+- **TypeScript** - Primary language for type-safe development
+- **React** - UI component framework
+- **Chart.js** - Data visualization and charting library
+- **TailwindCSS** (recommended) - Utility-first CSS framework
+
+### Backend
+- **Node.js** - Runtime environment
+- **TypeScript** - Type-safe backend code
+- **Express** or **Fastify** (TBD) - API framework
+
+### Database
+- **PostgreSQL** - Primary relational database for KPIs, configurations, and user data
+
+### Infrastructure
+- **Docker** - Containerization
+- **Docker Compose** - Local development orchestration
+- **AWS** - Target cloud deployment platform
 
 ## Project Conventions
 
 ### Code Style
-Standard typescript conventions.
+- Standard TypeScript conventions with strict mode enabled
+- ESLint + Prettier for consistent formatting
+- Use functional components with hooks in React
+- Prefer `const` over `let`, avoid `var`
+- Use meaningful variable and function names (camelCase)
+- Component files use PascalCase (e.g., `DashboardWidget.tsx`)
+- Utility files use camelCase (e.g., `formatKpi.ts`)
 
 ### Architecture Patterns
-Docker
-Docker Compose
+- **Modular Architecture** - Separate concerns into distinct modules:
+  - `integrations/` - Data source adapters (pluggable, no hardcoding)
+  - `kpi-engine/` - KPI calculation and formula engine
+  - `dashboard/` - Widget components and layout system
+  - `auth/` - Authentication and authorization
+  - `sharing/` - External link generation and management
+- **Docker-first** - All services run in containers
+- **API-first** - Backend exposes RESTful API consumed by frontend
+- **Adapter Pattern** - Integration adapters for each data source type
 
 ### Testing Strategy
-[Explain your testing approach and requirements]
+- **Unit Tests** - Jest for business logic, formula engine, and utilities
+- **Component Tests** - React Testing Library for UI components
+- **Integration Tests** - Test API endpoints and database operations
+- **E2E Tests** (optional) - Playwright or Cypress for critical user flows
+- Minimum coverage target: 70% for critical paths (KPI calculations, auth)
 
 ### Git Workflow
-[Describe your branching strategy and commit conventions]
+- **Branching**: `main` (production-ready), `feature/*`, `fix/*`, `chore/*`
+- **Commits**: Conventional Commits format (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`)
+- **Pull Requests**: Required for all changes to `main`
+- **Reviews**: At least one approval before merge
 
 ## Domain Context
-[Add domain-specific knowledge that AI assistants need to understand]
+
+### Key Concepts
+- **KPI (Key Performance Indicator)** - A measurable value that demonstrates progress toward a goal
+- **Data Source / Integration** - An external system that provides data (API, manual input, etc.)
+- **Widget** - A visual component displaying a KPI or chart on a dashboard
+- **Formula** - User-defined calculation combining fields from one or more data sources
+- **Target/Goal** - A defined objective for a KPI with period and direction (increase/decrease)
+- **Shareable Link** - Time-limited, signed URL for external access to specific dashboards/KPIs
+
+### User Roles
+- **Admin** - Full access, manages integrations and users
+- **Editor** - Can create/edit KPIs, dashboards, and widgets
+- **Viewer** - Read-only access to assigned dashboards
 
 ## Important Constraints
-[List any technical, business, or regulatory constraints]
+
+### Technical
+- No hardcoded integrations - all data sources must be configurable via UI
+- Secure credential storage - API keys and OAuth tokens must be encrypted
+- Rate limiting - Respect external API rate limits with caching layer
+- Docker compatibility - All components must run in containers
+
+### Business
+- AI-first development - Document where AI provides speed improvements
+- Demo requirements: 1 dashboard, 3+ KPIs, 2+ data sources (API + manual)
+- Norwegian language support for UI (based on requirements in Norwegian)
+
+### Security
+- Encrypted key storage for sensitive credentials
+- Protected API endpoints with authentication
+- Role-based access control (RBAC)
+- Signed, time-limited URLs for external sharing
 
 ## External Dependencies
-[Document key external services, APIs, or systems]
+
+### Required Services
+- **PostgreSQL** - Database (Docker container or managed AWS RDS)
+- **AWS Services** (planned):
+  - ECR - Container registry
+  - ECS/Fargate or EKS - Container orchestration
+  - RDS - Managed PostgreSQL
+  - Secrets Manager - Credential storage
+  - CloudFront - CDN for frontend
+
+### Third-party APIs (examples for integrations)
+- Various business APIs (configured at runtime, not hardcoded)
+- OAuth providers for authentication (Google, Microsoft, etc.)
+
+### Development Tools
+- Context7 MCP - AI documentation retrieval (configured in `.vscode/mcp.json`)
