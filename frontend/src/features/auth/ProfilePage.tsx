@@ -70,35 +70,35 @@ export function ProfilePage() {
     <div className="max-w-2xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
-        <p className="mt-1 text-sm text-gray-600">Manage your profile and security settings</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Account Settings</h1>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Manage your profile and security settings</p>
       </div>
 
       {/* Success/Error Messages */}
       {successMessage && (
-        <div className="mb-6 rounded-lg bg-green-50 border border-green-200 p-4">
+        <div className="mb-6 rounded-lg bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 p-4">
           <div className="flex">
             <svg className="h-5 w-5 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <p className="ml-3 text-sm text-green-700">{successMessage}</p>
+            <p className="ml-3 text-sm text-green-700 dark:text-green-300">{successMessage}</p>
           </div>
         </div>
       )}
 
       {displayError && (
-        <div className="mb-6 rounded-lg bg-red-50 border border-red-200 p-4">
+        <div className="mb-6 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 p-4">
           <div className="flex">
             <svg className="h-5 w-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="ml-3 text-sm text-red-700">{displayError}</p>
+            <p className="ml-3 text-sm text-red-700 dark:text-red-300">{displayError}</p>
           </div>
         </div>
       )}
 
       {/* User Info Card */}
-      <div className="bg-white shadow-sm rounded-xl border border-gray-200 p-6 mb-6">
+      <div className="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
         <div className="flex items-center space-x-4">
           <div className="h-16 w-16 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl">
             {user.name
@@ -111,12 +111,12 @@ export function ProfilePage() {
               : user.email[0].toUpperCase()}
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">{user.name || 'User'}</h2>
-            <p className="text-sm text-gray-500">{user.email}</p>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{user.name || 'User'}</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
             <span className={`inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs font-medium ${
-              user.role === 'ADMIN' ? 'bg-red-100 text-red-700' :
-              user.role === 'EDITOR' ? 'bg-blue-100 text-blue-700' :
-              'bg-gray-100 text-gray-700'
+              user.role === 'ADMIN' ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' :
+              user.role === 'EDITOR' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' :
+              'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
             }`}>
               {user.role}
             </span>
@@ -125,14 +125,14 @@ export function ProfilePage() {
       </div>
 
       {/* Section Tabs */}
-      <div className="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
-        <div className="flex border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="flex border-b border-gray-200 dark:border-gray-700">
           <button
             onClick={() => setActiveSection('profile')}
             className={`flex-1 py-4 text-sm font-medium transition-colors ${
               activeSection === 'profile'
-                ? 'text-violet-600 border-b-2 border-violet-600 bg-violet-50/50'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-600 dark:border-violet-400 bg-violet-50/50 dark:bg-violet-900/20'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
             }`}
           >
             Profile Information
@@ -141,8 +141,8 @@ export function ProfilePage() {
             onClick={() => setActiveSection('password')}
             className={`flex-1 py-4 text-sm font-medium transition-colors ${
               activeSection === 'password'
-                ? 'text-violet-600 border-b-2 border-violet-600 bg-violet-50/50'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-600 dark:border-violet-400 bg-violet-50/50 dark:bg-violet-900/20'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
             }`}
           >
             Change Password
@@ -154,28 +154,28 @@ export function ProfilePage() {
             <form onSubmit={handleUpdateProfile} className="space-y-6">
               {/* Email (read-only) */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">Email address</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email address</label>
                 <div className="mt-1">
                   <input
                     type="email"
                     value={user.email}
                     disabled
-                    className="block w-full px-3 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                    className="block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                   />
                 </div>
-                <p className="mt-1 text-xs text-gray-500">Email cannot be changed</p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Email cannot be changed</p>
               </div>
 
               {/* Name */}
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">Full name</label>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Full name</label>
                 <div className="mt-1">
                   <input
                     id="name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
+                    className="block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
                     placeholder="Your name"
                     disabled={isLoading}
                   />
@@ -185,7 +185,7 @@ export function ProfilePage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isLoading ? (
                   <>
@@ -204,7 +204,7 @@ export function ProfilePage() {
             <form onSubmit={handleChangePassword} className="space-y-6">
               {/* Current Password */}
               <div>
-                <label htmlFor="current-password" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Current password
                 </label>
                 <div className="mt-1 relative">
@@ -213,7 +213,7 @@ export function ProfilePage() {
                     type={showPasswords ? 'text' : 'password'}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
+                    className="block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
                     placeholder="••••••••"
                     disabled={isLoading}
                   />
@@ -222,7 +222,7 @@ export function ProfilePage() {
 
               {/* New Password */}
               <div>
-                <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   New password
                 </label>
                 <div className="mt-1 relative">
@@ -231,7 +231,7 @@ export function ProfilePage() {
                     type={showPasswords ? 'text' : 'password'}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
+                    className="block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
                     placeholder="••••••••"
                     disabled={isLoading}
                   />
@@ -246,15 +246,15 @@ export function ProfilePage() {
                     ].map((req) => (
                       <div key={req.label} className="flex items-center text-xs">
                         {req.met ? (
-                          <svg className="w-3.5 h-3.5 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-3.5 h-3.5 text-green-500 dark:text-green-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
                         ) : (
-                          <svg className="w-3.5 h-3.5 text-gray-300 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-3.5 h-3.5 text-gray-300 dark:text-gray-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                           </svg>
                         )}
-                        <span className={req.met ? 'text-green-600' : 'text-gray-400'}>{req.label}</span>
+                        <span className={req.met ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'}>{req.label}</span>
                       </div>
                     ))}
                   </div>
@@ -263,7 +263,7 @@ export function ProfilePage() {
 
               {/* Confirm New Password */}
               <div>
-                <label htmlFor="confirm-new-password" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="confirm-new-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Confirm new password
                 </label>
                 <div className="mt-1 relative">
@@ -272,15 +272,15 @@ export function ProfilePage() {
                     type={showPasswords ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={`block w-full px-3 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors ${
-                      confirmPassword && newPassword !== confirmPassword ? 'border-red-300' : 'border-gray-300'
+                    className={`block w-full px-3 py-3 border rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors ${
+                      confirmPassword && newPassword !== confirmPassword ? 'border-red-300 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
                     }`}
                     placeholder="••••••••"
                     disabled={isLoading}
                   />
                 </div>
                 {confirmPassword && newPassword !== confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">Passwords do not match</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">Passwords do not match</p>
                 )}
               </div>
 
@@ -291,9 +291,9 @@ export function ProfilePage() {
                   type="checkbox"
                   checked={showPasswords}
                   onChange={(e) => setShowPasswords(e.target.checked)}
-                  className="h-4 w-4 text-violet-600 focus:ring-violet-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-violet-600 focus:ring-violet-500 border-gray-300 dark:border-gray-600 rounded"
                 />
-                <label htmlFor="show-passwords" className="ml-2 text-sm text-gray-600">
+                <label htmlFor="show-passwords" className="ml-2 text-sm text-gray-600 dark:text-gray-400">
                   Show passwords
                 </label>
               </div>
@@ -301,7 +301,7 @@ export function ProfilePage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isLoading ? (
                   <>

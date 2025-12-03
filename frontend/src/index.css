@@ -1,11 +1,28 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode for Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Checkin Brand Colors */
 :root {
   --color-primary: #7C3AED;
   --color-primary-dark: #5B21B6;
   --color-primary-light: #EDE9FE;
   --color-accent: #7C3AED;
+}
+
+/* Dark mode CSS variables */
+.dark {
+  color-scheme: dark;
+}
+
+/* Smooth theme transition */
+html {
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+html.dark {
+  background-color: #111827; /* gray-900 */
 }
 
 /* Global Styles */
@@ -22,15 +39,19 @@ body {
 
 .btn-secondary {
   @apply bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg border border-gray-300 transition-colors;
+  @apply dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200 dark:border-gray-600;
 }
 
 /* Card styles */
 .card {
   @apply bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden;
+  @apply dark:bg-gray-800 dark:border-gray-700;
+  @apply transition-colors duration-200;
 }
 
 .card-header {
   @apply px-6 py-4 border-b border-gray-100;
+  @apply dark:border-gray-700;
 }
 
 .card-body {
@@ -46,10 +67,61 @@ input[type="url"],
 select,
 textarea {
   @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-violet-500 focus:ring-violet-500;
+  @apply dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400;
 }
 
 /* Focus ring override for violet */
 .focus-violet:focus {
   @apply outline-none ring-2 ring-violet-500 ring-offset-2;
+  @apply dark:ring-offset-gray-900;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Selection styling */
+::selection {
+  background-color: #c4b5fd;
+  color: #1f2937;
+}
+
+.dark ::selection {
+  background-color: #7c3aed;
+  color: white;
+}
+
+/* Improve checkbox and radio appearance in dark mode */
+input[type="checkbox"],
+input[type="radio"] {
+  @apply dark:bg-gray-700 dark:border-gray-500;
+}
+
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+  @apply dark:bg-violet-600 dark:border-violet-600;
 }
 

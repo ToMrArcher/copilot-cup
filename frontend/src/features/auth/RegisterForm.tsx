@@ -84,8 +84,8 @@ export function RegisterForm({ onSubmit, onSwitchToLogin, isLoading, error }: Re
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Name Field (Optional) */}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-          Full name <span className="text-gray-400">(optional)</span>
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Full name <span className="text-gray-400 dark:text-gray-500">(optional)</span>
         </label>
         <div className="mt-1 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -101,7 +101,7 @@ export function RegisterForm({ onSubmit, onSwitchToLogin, isLoading, error }: Re
             value={name}
             onChange={(e) => setName(e.target.value)}
             onBlur={() => setTouched(t => ({ ...t, name: true }))}
-            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
+            className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
             placeholder="John Doe"
             disabled={isLoading}
           />
@@ -110,7 +110,7 @@ export function RegisterForm({ onSubmit, onSwitchToLogin, isLoading, error }: Re
 
       {/* Email Field */}
       <div>
-        <label htmlFor="register-email" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="register-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Email address
         </label>
         <div className="mt-1 relative">
@@ -128,21 +128,21 @@ export function RegisterForm({ onSubmit, onSwitchToLogin, isLoading, error }: Re
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onBlur={() => setTouched(t => ({ ...t, email: true }))}
-            className={`block w-full pl-10 pr-3 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors ${
-              touched.email && email && !validateEmail(email) ? 'border-red-300' : 'border-gray-300'
+            className={`block w-full pl-10 pr-3 py-3 border rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors ${
+              touched.email && email && !validateEmail(email) ? 'border-red-300 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
             }`}
             placeholder="you@example.com"
             disabled={isLoading}
           />
         </div>
         {touched.email && email && !validateEmail(email) && (
-          <p className="mt-1 text-sm text-red-600">Please enter a valid email address</p>
+          <p className="mt-1 text-sm text-red-600 dark:text-red-400">Please enter a valid email address</p>
         )}
       </div>
 
       {/* Password Field */}
       <div>
-        <label htmlFor="register-password" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="register-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Password
         </label>
         <div className="mt-1 relative">
@@ -160,14 +160,14 @@ export function RegisterForm({ onSubmit, onSwitchToLogin, isLoading, error }: Re
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onBlur={() => setTouched(t => ({ ...t, password: true }))}
-            className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
+            className="block w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
             placeholder="••••••••"
             disabled={isLoading}
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           >
             {showPassword ? (
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,17 +186,17 @@ export function RegisterForm({ onSubmit, onSwitchToLogin, isLoading, error }: Re
         {password && (
           <div className="mt-2">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-gray-500">Password strength</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Password strength</span>
               <span className={`text-xs font-medium ${
-                passwordValidation.strength === 'strong' ? 'text-green-600' :
-                passwordValidation.strength === 'good' ? 'text-yellow-600' :
-                passwordValidation.strength === 'fair' ? 'text-orange-600' :
-                'text-red-600'
+                passwordValidation.strength === 'strong' ? 'text-green-600 dark:text-green-400' :
+                passwordValidation.strength === 'good' ? 'text-yellow-600 dark:text-yellow-400' :
+                passwordValidation.strength === 'fair' ? 'text-orange-600 dark:text-orange-400' :
+                'text-red-600 dark:text-red-400'
               }`}>
                 {passwordValidation.strength.charAt(0).toUpperCase() + passwordValidation.strength.slice(1)}
               </span>
             </div>
-            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
               <div
                 className={`h-full ${strengthColors[passwordValidation.strength]} ${strengthWidth[passwordValidation.strength]} transition-all duration-300`}
               />
@@ -212,15 +212,15 @@ export function RegisterForm({ onSubmit, onSwitchToLogin, isLoading, error }: Re
               ].map((req) => (
                 <div key={req.label} className="flex items-center text-xs">
                   {req.met ? (
-                    <svg className="w-3.5 h-3.5 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-3.5 h-3.5 text-green-500 dark:text-green-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   ) : (
-                    <svg className="w-3.5 h-3.5 text-gray-300 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-3.5 h-3.5 text-gray-300 dark:text-gray-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                   )}
-                  <span className={req.met ? 'text-green-600' : 'text-gray-400'}>{req.label}</span>
+                  <span className={req.met ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'}>{req.label}</span>
                 </div>
               ))}
             </div>
@@ -230,7 +230,7 @@ export function RegisterForm({ onSubmit, onSwitchToLogin, isLoading, error }: Re
 
       {/* Confirm Password Field */}
       <div>
-        <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Confirm password
         </label>
         <div className="mt-1 relative">
@@ -248,28 +248,28 @@ export function RegisterForm({ onSubmit, onSwitchToLogin, isLoading, error }: Re
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             onBlur={() => setTouched(t => ({ ...t, confirmPassword: true }))}
-            className={`block w-full pl-10 pr-3 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors ${
+            className={`block w-full pl-10 pr-3 py-3 border rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors ${
               touched.confirmPassword && confirmPassword && password !== confirmPassword
-                ? 'border-red-300'
-                : 'border-gray-300'
+                ? 'border-red-300 dark:border-red-500'
+                : 'border-gray-300 dark:border-gray-600'
             }`}
             placeholder="••••••••"
             disabled={isLoading}
           />
         </div>
         {touched.confirmPassword && confirmPassword && password !== confirmPassword && (
-          <p className="mt-1 text-sm text-red-600">Passwords do not match</p>
+          <p className="mt-1 text-sm text-red-600 dark:text-red-400">Passwords do not match</p>
         )}
       </div>
 
       {/* Error Message */}
       {displayError && (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-4">
+        <div className="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 p-4">
           <div className="flex">
             <svg className="h-5 w-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="ml-3 text-sm text-red-700">{displayError}</p>
+            <p className="ml-3 text-sm text-red-700 dark:text-red-300">{displayError}</p>
           </div>
         </div>
       )}
@@ -278,7 +278,7 @@ export function RegisterForm({ onSubmit, onSwitchToLogin, isLoading, error }: Re
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {isLoading ? (
           <>
@@ -295,12 +295,12 @@ export function RegisterForm({ onSubmit, onSwitchToLogin, isLoading, error }: Re
 
       {/* Switch to Login */}
       <div className="text-center">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           Already have an account?{' '}
           <button
             type="button"
             onClick={onSwitchToLogin}
-            className="font-medium text-violet-600 hover:text-violet-500 transition-colors"
+            className="font-medium text-violet-600 dark:text-violet-400 hover:text-violet-500 dark:hover:text-violet-300 transition-colors"
           >
             Sign in
           </button>

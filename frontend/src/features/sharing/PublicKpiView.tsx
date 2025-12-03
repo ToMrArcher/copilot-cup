@@ -13,10 +13,10 @@ export function PublicKpiView() {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Invalid Link</h1>
-          <p className="text-gray-500">This share link is not valid.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Invalid Link</h1>
+          <p className="text-gray-500 dark:text-gray-400">This share link is not valid.</p>
         </div>
       </div>
     )
@@ -24,7 +24,7 @@ export function PublicKpiView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500" />
       </div>
     )
@@ -36,9 +36,9 @@ export function PublicKpiView() {
     const isInactive = errorMessage.includes('inactive')
 
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
-          <div className="mx-auto h-16 w-16 text-gray-400 mb-4">
+          <div className="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500 mb-4">
             {isExpired ? (
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -49,10 +49,10 @@ export function PublicKpiView() {
               </svg>
             )}
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {isExpired ? 'Link Expired' : isInactive ? 'Link Inactive' : 'Link Not Found'}
           </h1>
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-gray-400">
             {isExpired 
               ? 'This share link has expired. Please request a new link from the owner.'
               : isInactive
@@ -66,10 +66,10 @@ export function PublicKpiView() {
 
   if (sharedResource.type !== 'kpi' || !sharedResource.kpi) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Invalid Content</h1>
-          <p className="text-gray-500">Expected a KPI but received different content.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Invalid Content</h1>
+          <p className="text-gray-500 dark:text-gray-400">Expected a KPI but received different content.</p>
         </div>
       </div>
     )
@@ -96,16 +96,16 @@ export function PublicKpiView() {
   const onTrack = progress !== null ? progress >= 100 : null
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{kpi.name}</h1>
-              <p className="text-sm text-gray-500 mt-1">Shared KPI</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{kpi.name}</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Shared KPI</p>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
@@ -117,28 +117,28 @@ export function PublicKpiView() {
 
       {/* Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           {/* Main Value */}
-          <div className="p-8 text-center border-b border-gray-100">
-            <div className="text-5xl font-bold text-gray-900 mb-2">
+          <div className="p-8 text-center border-b border-gray-100 dark:border-gray-700">
+            <div className="text-5xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               {formatValue(kpi.currentValue)}
             </div>
-            <div className="text-gray-500">Current Value</div>
+            <div className="text-gray-500 dark:text-gray-400">Current Value</div>
           </div>
 
           {/* Target & Progress (if showTarget is enabled) */}
           {showTarget && kpi.targetValue !== null && kpi.targetValue !== undefined && (
-            <div className="p-6 bg-gray-50">
+            <div className="p-6 bg-gray-50 dark:bg-gray-700/50">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-medium text-gray-700">Target</span>
-                <span className="text-lg font-semibold text-gray-900">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Target</span>
+                <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                   {formatValue(kpi.targetValue)}
                 </span>
               </div>
               
               {progress !== null && (
                 <>
-                  <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="relative h-3 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                     <div
                       className={`absolute left-0 top-0 h-full rounded-full transition-all ${
                         onTrack ? 'bg-green-500' : 'bg-amber-500'
@@ -147,8 +147,8 @@ export function PublicKpiView() {
                     />
                   </div>
                   <div className="flex items-center justify-between mt-2">
-                    <span className="text-sm text-gray-500">Progress</span>
-                    <span className={`text-sm font-medium ${onTrack ? 'text-green-600' : 'text-amber-600'}`}>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Progress</span>
+                    <span className={`text-sm font-medium ${onTrack ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}`}>
                       {progress.toFixed(1)}%
                     </span>
                   </div>
@@ -161,28 +161,28 @@ export function PublicKpiView() {
           <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             {kpi.description && (
               <div className="md:col-span-2">
-                <h3 className="text-sm font-medium text-gray-500 mb-1">Description</h3>
-                <p className="text-gray-900">{kpi.description}</p>
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Description</h3>
+                <p className="text-gray-900 dark:text-gray-100">{kpi.description}</p>
               </div>
             )}
 
             {showTarget && kpi.targetDirection && (
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-1">Target Direction</h3>
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Target Direction</h3>
                 <div className="flex items-center gap-2">
                   {kpi.targetDirection === 'increase' ? (
                     <>
                       <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                       </svg>
-                      <span className="text-gray-900">Increase</span>
+                      <span className="text-gray-900 dark:text-gray-100">Increase</span>
                     </>
                   ) : (
                     <>
                       <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
                       </svg>
-                      <span className="text-gray-900">Decrease</span>
+                      <span className="text-gray-900 dark:text-gray-100">Decrease</span>
                     </>
                   )}
                 </div>
@@ -191,8 +191,8 @@ export function PublicKpiView() {
 
             {showTarget && kpi.targetPeriod && (
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-1">Target Period</h3>
-                <span className="text-gray-900">{kpi.targetPeriod}</span>
+                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Target Period</h3>
+                <span className="text-gray-900 dark:text-gray-100">{kpi.targetPeriod}</span>
               </div>
             )}
           </div>
@@ -200,8 +200,8 @@ export function PublicKpiView() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-auto">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm text-gray-500">
+      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-auto">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
           Powered by KPI Dashboard
         </div>
       </footer>

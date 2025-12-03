@@ -5,7 +5,8 @@
 
 import { Line } from 'react-chartjs-2'
 import type { ChartData, ChartOptions } from 'chart.js'
-import { chartColors, defaultChartOptions, formatChartDate, formatValue } from '../../lib/chartConfig'
+import { chartColors, getChartOptions, getChartColors, formatChartDate, formatValue } from '../../lib/chartConfig'
+import { useTheme } from '../../contexts/ThemeContext'
 
 export interface LineChartProps {
   data: Array<{ timestamp: string | Date; value: number }>
@@ -23,13 +24,18 @@ export function LineChart({
   data,
   interval = 'daily',
   label = 'Value',
-  color = chartColors.primary,
+  color,
   fill = true,
   showTarget = false,
   targetValue,
   format,
   height = 200,
 }: LineChartProps) {
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark'
+  const themeColors = getChartColors(isDark)
+  const chartColor = color || themeColors.primary
+  
   const labels = data.map(d => formatChartDate(d.timestamp, interval))
   const values = data.map(d => d.value)
 
@@ -39,21 +45,21 @@ export function LineChart({
       {
         label,
         data: values,
-        borderColor: color,
-        backgroundColor: fill ? `${color}20` : 'transparent',
+        borderColor: chartColor,
+        backgroundColor: fill ? `${chartColor}20` : 'transparent',
         borderWidth: 2,
         fill,
         tension: 0.3,
         pointRadius: data.length > 20 ? 0 : 3,
         pointHoverRadius: 5,
-        pointBackgroundColor: color,
+        pointBackgroundColor: chartColor,
       },
       ...(showTarget && targetValue
         ? [
             {
               label: 'Target',
               data: Array(data.length).fill(targetValue),
-              borderColor: chartColors.success,
+              borderColor: themeColors.success,
               borderWidth: 2,
               borderDash: [5, 5],
               fill: false,
@@ -65,12 +71,13 @@ export function LineChart({
     ],
   }
 
+  const baseOptions = getChartOptions(isDark)
   const options: ChartOptions<'line'> = {
-    ...defaultChartOptions,
+    ...baseOptions,
     plugins: {
-      ...defaultChartOptions.plugins,
+      ...baseOptions.plugins,
       tooltip: {
-        ...defaultChartOptions.plugins?.tooltip,
+        ...baseOptions.plugins?.tooltip,
         callbacks: {
           label: (context) => {
             const value = context.parsed.y

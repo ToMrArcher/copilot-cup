@@ -46,7 +46,7 @@ export function GaugeWidget({
             showTarget={!!targetValue}
           />
         ) : (
-          <div className="text-gray-400 text-sm">No data</div>
+          <div className="text-gray-400 dark:text-gray-500 text-sm">No data</div>
         )}
       </div>
     </Widget>

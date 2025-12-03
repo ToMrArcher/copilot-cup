@@ -51,9 +51,9 @@ export function StatWidget({
   )
 
   const getTrendColor = () => {
-    if (calculatedDirection === 'up') return 'text-green-600'
-    if (calculatedDirection === 'down') return 'text-red-600'
-    return 'text-gray-500'
+    if (calculatedDirection === 'up') return 'text-green-600 dark:text-green-400'
+    if (calculatedDirection === 'down') return 'text-red-600 dark:text-red-400'
+    return 'text-gray-500 dark:text-gray-400'
   }
 
   const getTrendIcon = () => {
@@ -87,7 +87,7 @@ export function StatWidget({
       onDelete={onDelete}
     >
       <div className="text-center">
-        <div className="text-3xl font-bold text-gray-900">
+        <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
           {prefix}{formattedValue}{suffix}
         </div>
         
@@ -97,7 +97,7 @@ export function StatWidget({
             <span className="text-sm font-medium">
               {calculatedChange > 0 ? '+' : ''}{calculatedChange.toFixed(1)}%
             </span>
-            <span className="text-xs text-gray-400 ml-1">vs previous</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">vs previous</span>
           </div>
         )}
       </div>

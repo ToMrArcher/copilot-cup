@@ -47,17 +47,17 @@ export function NumberWidget({
       onDelete={onDelete}
     >
       <div className="text-center">
-        <div className="text-3xl font-bold text-gray-900">
+        <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
           {prefix}{formattedValue}{suffix}
         </div>
         
         {targetValue !== undefined && targetValue !== null && (
           <div className="mt-2">
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               Target: {prefix}{formatValue(targetValue, format)}{suffix}
             </div>
             {progress !== null && (
-              <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+              <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                 <div
                   className={`h-2 rounded-full transition-all ${
                     progress >= 100 

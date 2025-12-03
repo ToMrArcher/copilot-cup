@@ -5,7 +5,8 @@
 
 import { Doughnut } from 'react-chartjs-2'
 import type { ChartData, ChartOptions } from 'chart.js'
-import { chartColors, formatValue } from '../../lib/chartConfig'
+import { getChartColors, formatValue } from '../../lib/chartConfig'
+import { useTheme } from '../../contexts/ThemeContext'
 
 export interface GaugeChartProps {
   value: number
@@ -30,16 +31,20 @@ export function GaugeChart({
   showValue = true,
   showTarget = true,
 }: GaugeChartProps) {
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark'
+  const themeColors = getChartColors(isDark)
+  
   // Calculate percentage for gauge
   const percentage = Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100))
   const remaining = 100 - percentage
 
   // Determine color based on progress
   const getColor = () => {
-    if (percentage >= 100) return chartColors.success
-    if (percentage >= 75) return chartColors.primary
-    if (percentage >= 50) return chartColors.warning
-    return chartColors.danger
+    if (percentage >= 100) return themeColors.success
+    if (percentage >= 75) return themeColors.primary
+    if (percentage >= 50) return themeColors.warning
+    return themeColors.danger
   }
 
   const gaugeColor = getColor()
@@ -48,7 +53,7 @@ export function GaugeChart({
     datasets: [
       {
         data: [percentage, remaining],
-        backgroundColor: [gaugeColor, chartColors.neutralLight],
+        backgroundColor: [gaugeColor, themeColors.neutralLight],
         borderWidth: 0,
         circumference: 180,
         rotation: 270,
@@ -78,15 +83,15 @@ export function GaugeChart({
         style={{ top: size / 4 }}
       >
         {showValue && (
-          <span className="text-2xl font-bold text-gray-900">
+          <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {format === 'percent' ? `${percentage.toFixed(1)}%` : formatValue(value, format)}
           </span>
         )}
         {label && (
-          <span className="text-xs text-gray-500">{label}</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
         )}
         {showTarget && target !== undefined && (
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-gray-400 dark:text-gray-500">
             Target: {formatValue(target, format)}
           </span>
         )}

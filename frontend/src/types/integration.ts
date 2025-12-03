@@ -1,6 +1,6 @@
 export type IntegrationType = 'API' | 'MANUAL' | 'WEBHOOK'
 
-export type IntegrationStatus = 'pending' | 'connected' | 'synced' | 'error'
+export type IntegrationStatus = 'pending' | 'active' | 'connected' | 'synced' | 'error'
 
 export interface DataField {
   id: string

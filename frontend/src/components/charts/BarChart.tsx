@@ -5,7 +5,8 @@
 
 import { Bar } from 'react-chartjs-2'
 import type { ChartData, ChartOptions } from 'chart.js'
-import { chartColors, defaultChartOptions, formatChartDate, formatValue } from '../../lib/chartConfig'
+import { getChartOptions, getChartColors, formatChartDate, formatValue } from '../../lib/chartConfig'
+import { useTheme } from '../../contexts/ThemeContext'
 
 export interface BarChartProps {
   data: Array<{ timestamp: string | Date; value: number }>
@@ -21,11 +22,16 @@ export function BarChart({
   data,
   interval = 'daily',
   label = 'Value',
-  color = chartColors.primary,
+  color,
   format,
   height = 200,
   horizontal = false,
 }: BarChartProps) {
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark'
+  const themeColors = getChartColors(isDark)
+  const chartColor = color || themeColors.primary
+  
   const labels = data.map(d => formatChartDate(d.timestamp, interval))
   const values = data.map(d => d.value)
 
@@ -35,22 +41,23 @@ export function BarChart({
       {
         label,
         data: values,
-        backgroundColor: `${color}CC`,
-        borderColor: color,
+        backgroundColor: `${chartColor}CC`,
+        borderColor: chartColor,
         borderWidth: 1,
         borderRadius: 4,
-        hoverBackgroundColor: color,
+        hoverBackgroundColor: chartColor,
       },
     ],
   }
 
+  const baseOptions = getChartOptions(isDark)
   const options: ChartOptions<'bar'> = {
-    ...defaultChartOptions,
+    ...baseOptions,
     indexAxis: horizontal ? 'y' : 'x',
     plugins: {
-      ...defaultChartOptions.plugins,
+      ...baseOptions.plugins,
       tooltip: {
-        ...defaultChartOptions.plugins?.tooltip,
+        ...baseOptions.plugins?.tooltip,
         callbacks: {
           label: (context) => {
             const value = context.parsed[horizontal ? 'x' : 'y']

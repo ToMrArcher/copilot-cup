@@ -36,8 +36,8 @@ export function SharingPage() {
   if (error) {
     return (
       <div className="px-4 py-6 sm:px-0">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-600">Failed to load share links. Please try again.</p>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <p className="text-red-600 dark:text-red-400">Failed to load share links. Please try again.</p>
         </div>
       </div>
     )
@@ -47,8 +47,8 @@ export function SharingPage() {
     <div className="px-4 py-6 sm:px-0">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Share Links</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Share Links</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Manage your shared dashboards and KPIs
         </p>
       </div>
@@ -56,14 +56,14 @@ export function SharingPage() {
       {/* Filters */}
       <div className="mb-6 flex flex-wrap gap-4">
         <div>
-          <label htmlFor="filterType" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="filterType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Type
           </label>
           <select
             id="filterType"
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as FilterType)}
-            className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
           >
             <option value="all">All types</option>
             <option value="dashboard">Dashboards</option>
@@ -72,14 +72,14 @@ export function SharingPage() {
         </div>
 
         <div>
-          <label htmlFor="filterStatus" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="filterStatus" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Status
           </label>
           <select
             id="filterStatus"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
-            className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
           >
             <option value="all">All statuses</option>
             <option value="active">Active</option>
@@ -91,9 +91,9 @@ export function SharingPage() {
 
       {/* Links list */}
       {filteredLinks.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
           <svg
-            className="mx-auto h-12 w-12 text-gray-400"
+            className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -105,8 +105,8 @@ export function SharingPage() {
               d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
             />
           </svg>
-          <h3 className="mt-4 text-lg font-medium text-gray-900">No share links</h3>
-          <p className="mt-2 text-sm text-gray-500">
+          <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">No share links</h3>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             {links.length === 0
               ? 'Create your first share link from a dashboard or KPI page.'
               : 'No links match your current filters.'}

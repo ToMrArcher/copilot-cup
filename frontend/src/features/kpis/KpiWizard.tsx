@@ -125,12 +125,12 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-gray-900">Create KPI</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Create KPI</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600"
@@ -147,10 +147,10 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
               <div key={s} className="flex-1">
                 <div
                   className={`h-1 rounded-full ${
-                    s <= step ? 'bg-violet-600' : 'bg-gray-200'
+                    s <= step ? 'bg-violet-600 dark:bg-violet-500' : 'bg-gray-200 dark:bg-gray-700'
                   }`}
                 />
-                <div className={`text-xs mt-1 ${s === step ? 'text-violet-600 font-medium' : 'text-gray-400'}`}>
+                <div className={`text-xs mt-1 ${s === step ? 'text-violet-600 dark:text-violet-400 font-medium' : 'text-gray-400 dark:text-gray-500'}`}>
                   {s === 1 && 'Basic Info'}
                   {s === 2 && 'Data Sources'}
                   {s === 3 && 'Formula'}
@@ -167,7 +167,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
           {step === 1 && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   KPI Name *
                 </label>
                 <input
@@ -175,11 +175,11 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="e.g., Revenue per Employee"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Description
                 </label>
                 <textarea
@@ -187,7 +187,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                   onChange={e => setDescription(e.target.value)}
                   placeholder="Optional description of what this KPI measures"
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
                 />
               </div>
             </div>
@@ -196,7 +196,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
           {/* Step 2: Data Sources */}
           {step === 2 && (
             <div className="space-y-4">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Select the data fields to use in your KPI formula. You can assign short aliases for easier formula writing.
               </p>
 
@@ -205,25 +205,25 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600" />
                 </div>
               ) : availableFields?.integrations.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   No data sources available. Please create an integration and sync data first.
                 </div>
               ) : (
                 <div className="space-y-4">
                   {availableFields?.integrations.map(({ integration, fields }) => (
-                    <div key={integration.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                      <div className="bg-gray-50 px-4 py-2 font-medium text-gray-700">
+                    <div key={integration.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                      <div className="bg-gray-50 dark:bg-gray-700 px-4 py-2 font-medium text-gray-700 dark:text-gray-200">
                         {integration.name}
-                        <span className="ml-2 text-xs text-gray-400">({integration.type})</span>
+                        <span className="ml-2 text-xs text-gray-400 dark:text-gray-500">({integration.type})</span>
                       </div>
-                      <div className="divide-y divide-gray-100">
+                      <div className="divide-y divide-gray-100 dark:divide-gray-700">
                         {fields.map(field => {
                           const selected = selectedSources.find(s => s.dataFieldId === field.id)
                           return (
                             <div
                               key={field.id}
                               className={`px-4 py-3 flex items-center gap-4 ${
-                                selected ? 'bg-violet-50' : 'hover:bg-gray-50'
+                                selected ? 'bg-violet-50 dark:bg-violet-900/30' : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
                               }`}
                             >
                               <input
@@ -233,11 +233,11 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                                 className="w-4 h-4 text-violet-600 rounded"
                               />
                               <div className="flex-1">
-                                <div className="font-medium text-gray-900">{field.name}</div>
-                                <div className="text-xs text-gray-500">
+                                <div className="font-medium text-gray-900 dark:text-gray-100">{field.name}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">
                                   {field.path} · {field.dataType}
                                   {!field.hasData && (
-                                    <span className="text-amber-500 ml-2">⚠ No data synced</span>
+                                    <span className="text-amber-500 dark:text-amber-400 ml-2">⚠ No data synced</span>
                                   )}
                                 </div>
                               </div>
@@ -247,7 +247,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                                   value={selected.alias}
                                   onChange={e => handleAliasChange(field.id, e.target.value)}
                                   placeholder="alias"
-                                  className="w-32 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-violet-500"
+                                  className="w-32 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded focus:ring-1 focus:ring-violet-500"
                                 />
                               )}
                             </div>
@@ -260,11 +260,11 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
               )}
 
               {selectedSources.length > 0 && (
-                <div className="mt-4 p-3 bg-violet-50 rounded-lg">
-                  <div className="text-sm font-medium text-violet-700">
+                <div className="mt-4 p-3 bg-violet-50 dark:bg-violet-900/30 rounded-lg">
+                  <div className="text-sm font-medium text-violet-700 dark:text-violet-300">
                     Selected: {selectedSources.length} field(s)
                   </div>
-                  <div className="text-xs text-violet-600 mt-1">
+                  <div className="text-xs text-violet-600 dark:text-violet-400 mt-1">
                     Variables: {selectedSources.map(s => s.alias).join(', ')}
                   </div>
                 </div>
@@ -276,7 +276,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
           {step === 3 && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Formula *
                 </label>
                 <input
@@ -287,24 +287,24 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                     setFormulaError(null)
                   }}
                   placeholder="e.g., revenue / employees"
-                  className={`w-full px-3 py-2 border rounded-lg font-mono focus:ring-2 focus:ring-violet-500 ${
-                    formulaError ? 'border-red-300' : 'border-gray-300'
+                  className={`w-full px-3 py-2 border rounded-lg font-mono bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-violet-500 ${
+                    formulaError ? 'border-red-300 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
                   }`}
                 />
                 {formulaError && (
-                  <p className="mt-1 text-sm text-red-600">{formulaError}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formulaError}</p>
                 )}
               </div>
 
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <div className="text-sm font-medium text-gray-700 mb-2">Available Variables</div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Available Variables</div>
                 <div className="flex flex-wrap gap-2">
                   {selectedSources.map(s => (
                     <button
                       key={s.dataFieldId}
                       type="button"
                       onClick={() => setFormula(f => f + (f && !f.endsWith(' ') ? ' ' : '') + s.alias)}
-                      className="px-2 py-1 bg-violet-100 text-violet-700 rounded text-sm hover:bg-violet-200"
+                      className="px-2 py-1 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 rounded text-sm hover:bg-violet-200 dark:hover:bg-violet-800/50"
                     >
                       {s.alias}
                     </button>
@@ -312,20 +312,20 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                 </div>
               </div>
 
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <div className="text-sm font-medium text-gray-700 mb-2">Formula Examples</div>
-                <div className="space-y-1 text-sm text-gray-600">
-                  <div><code>revenue / employees</code> - Revenue per employee</div>
-                  <div><code>(revenue - costs) / revenue * 100</code> - Profit margin %</div>
-                  <div><code>sum(sales) / count(sales)</code> - Average sale</div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Formula Examples</div>
+                <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                  <div><code className="dark:text-gray-300">revenue / employees</code> - Revenue per employee</div>
+                  <div><code className="dark:text-gray-300">(revenue - costs) / revenue * 100</code> - Profit margin %</div>
+                  <div><code className="dark:text-gray-300">sum(sales) / count(sales)</code> - Average sale</div>
                 </div>
               </div>
 
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <div className="text-sm font-medium text-gray-700 mb-2">Supported Functions</div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Supported Functions</div>
                 <div className="flex flex-wrap gap-2 text-sm">
                   {['sum', 'avg', 'min', 'max', 'count'].map(fn => (
-                    <code key={fn} className="px-2 py-1 bg-white border border-gray-200 rounded">
+                    <code key={fn} className="px-2 py-1 bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 text-gray-700 dark:text-gray-200 rounded">
                       {fn}()
                     </code>
                   ))}
@@ -337,12 +337,12 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
           {/* Step 4: Target */}
           {step === 4 && (
             <div className="space-y-4">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Set a target goal for this KPI (optional). The system will track progress toward your goal.
               </p>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Target Value
                 </label>
                 <input
@@ -350,12 +350,12 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                   value={targetValue}
                   onChange={e => setTargetValue(e.target.value)}
                   placeholder="e.g., 100000"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-violet-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Direction
                 </label>
                 <div className="flex gap-4">
@@ -367,7 +367,7 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                       onChange={() => setTargetDirection('increase')}
                       className="w-4 h-4 text-violet-600"
                     />
-                    <span className="text-gray-700">↑ Increase (higher is better)</span>
+                    <span className="text-gray-700 dark:text-gray-300">↑ Increase (higher is better)</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -377,19 +377,19 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
                       onChange={() => setTargetDirection('decrease')}
                       className="w-4 h-4 text-violet-600"
                     />
-                    <span className="text-gray-700">↓ Decrease (lower is better)</span>
+                    <span className="text-gray-700 dark:text-gray-300">↓ Decrease (lower is better)</span>
                   </label>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Target Period
                 </label>
                 <select
                   value={targetPeriod}
                   onChange={e => setTargetPeriod(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-violet-500"
                 >
                   <option value="daily">Daily</option>
                   <option value="weekly">Weekly</option>
@@ -400,15 +400,15 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
               </div>
 
               {/* Summary */}
-              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="text-sm font-medium text-gray-700 mb-2">Summary</div>
-                <div className="space-y-1 text-sm text-gray-600">
-                  <div><strong>Name:</strong> {name}</div>
-                  <div><strong>Formula:</strong> <code>{formula}</code></div>
-                  <div><strong>Sources:</strong> {selectedSources.map(s => s.alias).join(', ')}</div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Summary</div>
+                <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                  <div><strong className="dark:text-gray-200">Name:</strong> {name}</div>
+                  <div><strong className="dark:text-gray-200">Formula:</strong> <code className="dark:text-gray-300">{formula}</code></div>
+                  <div><strong className="dark:text-gray-200">Sources:</strong> {selectedSources.map(s => s.alias).join(', ')}</div>
                   {targetValue && (
                     <div>
-                      <strong>Target:</strong> {targetValue} ({targetDirection}, {targetPeriod})
+                      <strong className="dark:text-gray-200">Target:</strong> {targetValue} ({targetDirection}, {targetPeriod})
                     </div>
                   )}
                 </div>
@@ -418,10 +418,10 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 flex justify-between">
+        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-between">
           <button
             onClick={step === 1 ? onClose : handleBack}
-            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+            className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
           >
             {step === 1 ? 'Cancel' : 'Back'}
           </button>

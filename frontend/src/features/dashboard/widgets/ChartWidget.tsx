@@ -52,7 +52,7 @@ export function ChartWidget({
   const renderChart = () => {
     if (!data || data.length === 0) {
       return (
-        <div className="text-gray-400 text-sm text-center py-8">
+        <div className="text-gray-400 dark:text-gray-500 text-sm text-center py-8">
           No data available
         </div>
       )
@@ -102,7 +102,7 @@ export function ChartWidget({
                   className={`px-2 py-1 text-xs font-medium border ${
                     selectedPeriod === period
                       ? 'bg-violet-500 text-white border-violet-500'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
                   } ${
                     period === periods[0] ? 'rounded-l-md' : ''
                   } ${

@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
-import logoSvg from '../assets/logo.svg'
+import { Logo } from './Logo'
 import { UserMenu } from '../features/auth/UserMenu'
+import { ThemeToggle } from './ThemeToggle'
 
 export function Layout() {
   const location = useLocation()
@@ -13,21 +14,21 @@ export function Layout() {
   const navLinkClass = (path: string) => {
     const base = "inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors"
     if (isActive(path)) {
-      return `${base} bg-violet-100 text-violet-700`
+      return `${base} bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300`
     }
-    return `${base} text-gray-600 hover:bg-gray-100 hover:text-gray-900`
+    return `${base} text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100`
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+      <nav className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             {/* Logo */}
             <div className="flex items-center">
               <Link to="/" className="flex-shrink-0 flex items-center">
-                <img src={logoSvg} alt="Checkin" className="h-8 w-auto" />
+                <Logo className="h-8 w-auto" />
               </Link>
             </div>
             
@@ -59,13 +60,14 @@ export function Layout() {
               </Link>
             </div>
             
-            {/* User Menu */}
-            <div className="flex items-center space-x-4">
+            {/* User Menu and Theme Toggle */}
+            <div className="flex items-center space-x-2">
+              <ThemeToggle />
               <UserMenu />
               
               {/* Mobile menu button */}
               <div className="sm:hidden">
-                <button className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+                <button className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
@@ -82,9 +84,9 @@ export function Layout() {
       </main>
       
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-auto">
+      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-auto">
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm text-gray-500 dark:text-gray-400">
             © 2025 Checkin. All rights reserved.
           </p>
         </div>

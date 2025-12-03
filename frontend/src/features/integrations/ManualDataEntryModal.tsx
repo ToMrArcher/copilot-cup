@@ -1,7 +1,22 @@
 import { useState, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { integrationsApi } from '../../lib/api'
-import type { Integration } from '../../types/integration'
+import type { Integration, DataField, LegacyDataField } from '../../types/integration'
+
+// Type guard to check if a field is a LegacyDataField
+function isLegacyDataField(field: DataField | LegacyDataField): field is LegacyDataField {
+  return 'name' in field && 'dataType' in field
+}
+
+// Helper to get field display name
+function getFieldName(field: DataField | LegacyDataField): string {
+  return isLegacyDataField(field) ? field.name : field.sourceField
+}
+
+// Helper to get field data type
+function getFieldType(field: DataField | LegacyDataField): string {
+  return isLegacyDataField(field) ? field.dataType : field.fieldType
+}
 
 interface ManualDataEntryModalProps {
   integration: Integration
@@ -64,7 +79,8 @@ export function ManualDataEntryModal({
       const value = values[field.id]
       if (value === undefined || value === '') continue
 
-      switch (field.dataType?.toLowerCase()) {
+      const fieldType = getFieldType(field)
+      switch (fieldType?.toLowerCase()) {
         case 'number':
           typedValues[field.id] = parseFloat(value)
           break
@@ -90,20 +106,20 @@ export function ManualDataEntryModal({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        className="fixed inset-0 bg-black/50 dark:bg-black/70 transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
+        <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 Enter Data
               </h2>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 {integration.name}
               </p>
             </div>
@@ -123,7 +139,7 @@ export function ManualDataEntryModal({
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600" />
             </div>
           ) : !integration.dataFields || integration.dataFields.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               <p>No data fields defined for this integration.</p>
               <p className="text-sm mt-2">
                 Please edit the integration to add fields first.
@@ -132,23 +148,26 @@ export function ManualDataEntryModal({
           ) : (
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
-                {integration.dataFields.map(field => (
+                {integration.dataFields.map(field => {
+                  const fieldName = getFieldName(field)
+                  const fieldType = getFieldType(field)
+                  return (
                   <div key={field.id}>
                     <label
                       htmlFor={field.id}
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                     >
-                      {field.name}
-                      <span className="ml-2 text-xs text-gray-400">
-                        ({field.dataType})
+                      {fieldName}
+                      <span className="ml-2 text-xs text-gray-400 dark:text-gray-500">
+                        ({fieldType})
                       </span>
                     </label>
-                    {field.dataType?.toLowerCase() === 'boolean' ? (
+                    {fieldType?.toLowerCase() === 'boolean' ? (
                       <select
                         id={field.id}
                         value={values[field.id] || ''}
                         onChange={e => setValues({ ...values, [field.id]: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-violet-500 focus:border-violet-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:ring-violet-500 focus:border-violet-500"
                       >
                         <option value="">Select...</option>
                         <option value="true">True</option>
@@ -156,27 +175,27 @@ export function ManualDataEntryModal({
                       </select>
                     ) : (
                       <input
-                        type={field.dataType?.toLowerCase() === 'number' ? 'number' : 'text'}
+                        type={fieldType?.toLowerCase() === 'number' ? 'number' : 'text'}
                         id={field.id}
                         value={values[field.id] || ''}
                         onChange={e => setValues({ ...values, [field.id]: e.target.value })}
-                        step={field.dataType?.toLowerCase() === 'number' ? 'any' : undefined}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-violet-500 focus:border-violet-500"
-                        placeholder={`Enter ${field.name.toLowerCase()}`}
+                        step={fieldType?.toLowerCase() === 'number' ? 'any' : undefined}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:ring-violet-500 focus:border-violet-500"
+                        placeholder={`Enter ${fieldName.toLowerCase()}`}
                       />
                     )}
                     {currentData?.fields.find(f => f.id === field.id)?.lastUpdated && (
-                      <p className="text-xs text-gray-400 mt-1">
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                         Last updated: {new Date(currentData.fields.find(f => f.id === field.id)!.lastUpdated!).toLocaleString()}
                       </p>
                     )}
                   </div>
-                ))}
+                )})}
               </div>
 
               {/* Error */}
               {error && (
-                <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-md text-sm">
+                <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-md text-sm">
                   {error}
                 </div>
               )}
@@ -186,7 +205,7 @@ export function ManualDataEntryModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
                 >
                   Cancel
                 </button>

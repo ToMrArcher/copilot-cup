@@ -14,10 +14,10 @@ export function PublicShareView() {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Invalid Link</h1>
-          <p className="text-gray-500">This share link is not valid.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Invalid Link</h1>
+          <p className="text-gray-500 dark:text-gray-400">This share link is not valid.</p>
         </div>
       </div>
     )
@@ -25,7 +25,7 @@ export function PublicShareView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500" />
       </div>
     )
@@ -37,9 +37,9 @@ export function PublicShareView() {
     const isInactive = errorMessage.includes('inactive')
 
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
-          <div className="mx-auto h-16 w-16 text-gray-400 mb-4">
+          <div className="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500 mb-4">
             {isExpired ? (
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -50,10 +50,10 @@ export function PublicShareView() {
               </svg>
             )}
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {isExpired ? 'Link Expired' : isInactive ? 'Link Inactive' : 'Link Not Found'}
           </h1>
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-gray-400">
             {isExpired 
               ? 'This share link has expired. Please request a new link from the owner.'
               : isInactive
@@ -73,10 +73,10 @@ export function PublicShareView() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Unknown Content</h1>
-        <p className="text-gray-500">Unable to display this shared content.</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Unknown Content</h1>
+        <p className="text-gray-500 dark:text-gray-400">Unable to display this shared content.</p>
       </div>
     </div>
   )

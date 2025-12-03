@@ -5,7 +5,8 @@
 
 import { Line } from 'react-chartjs-2'
 import type { ChartData, ChartOptions } from 'chart.js'
-import { chartColors, defaultChartOptions, formatChartDate, formatValue } from '../../lib/chartConfig'
+import { getChartOptions, getChartColors, formatChartDate, formatValue } from '../../lib/chartConfig'
+import { useTheme } from '../../contexts/ThemeContext'
 
 export interface AreaChartProps {
   data: Array<{ timestamp: string | Date; value: number }>
@@ -21,10 +22,15 @@ export function AreaChart({
   data,
   interval = 'daily',
   label = 'Value',
-  color = chartColors.primary,
+  color,
   format,
   height = 200,
 }: AreaChartProps) {
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark'
+  const themeColors = getChartColors(isDark)
+  const chartColor = color || themeColors.primary
+  
   const labels = data.map(d => formatChartDate(d.timestamp, interval))
   const values = data.map(d => d.value)
 
@@ -34,24 +40,25 @@ export function AreaChart({
       {
         label,
         data: values,
-        borderColor: color,
-        backgroundColor: `${color}40`,
+        borderColor: chartColor,
+        backgroundColor: `${chartColor}40`,
         borderWidth: 2,
         fill: true,
         tension: 0.4,
         pointRadius: 0,
         pointHoverRadius: 5,
-        pointBackgroundColor: color,
+        pointBackgroundColor: chartColor,
       },
     ],
   }
 
+  const baseOptions = getChartOptions(isDark)
   const options: ChartOptions<'line'> = {
-    ...defaultChartOptions,
+    ...baseOptions,
     plugins: {
-      ...defaultChartOptions.plugins,
+      ...baseOptions.plugins,
       tooltip: {
-        ...defaultChartOptions.plugins?.tooltip,
+        ...baseOptions.plugins?.tooltip,
         callbacks: {
           label: (context) => {
             const value = context.parsed.y
@@ -61,9 +68,9 @@ export function AreaChart({
       },
     },
     scales: {
-      ...defaultChartOptions.scales,
+      ...baseOptions.scales,
       y: {
-        ...defaultChartOptions.scales?.y,
+        ...baseOptions.scales?.y,
         beginAtZero: true,
       },
     },

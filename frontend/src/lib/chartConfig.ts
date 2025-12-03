@@ -44,6 +44,23 @@ export const chartColors = {
   background: '#F9FAFB',  // Gray-50
 }
 
+// Dark mode color palette
+export const chartColorsDark = {
+  primary: '#A78BFA',     // Violet-400
+  primaryLight: '#7C3AED', // Violet-600
+  success: '#34D399',     // Emerald-400
+  warning: '#FBBF24',     // Amber-400
+  danger: '#F87171',      // Red-400
+  neutral: '#9CA3AF',     // Gray-400
+  neutralLight: '#374151', // Gray-700
+  background: '#111827',  // Gray-900
+}
+
+// Get theme-aware colors
+export function getChartColors(isDark: boolean) {
+  return isDark ? chartColorsDark : chartColors
+}
+
 // Default chart options
 export const defaultChartOptions: ChartOptions<'line'> = {
   responsive: true,
@@ -86,6 +103,58 @@ export const defaultChartOptions: ChartOptions<'line'> = {
     intersect: false,
     mode: 'index',
   },
+}
+
+// Get theme-aware chart options
+export function getChartOptions(isDark: boolean): ChartOptions<'line'> {
+  const colors = getChartColors(isDark)
+  
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        enabled: true,
+        backgroundColor: isDark ? 'rgba(31, 41, 55, 0.95)' : 'rgba(0, 0, 0, 0.8)',
+        titleColor: isDark ? '#F9FAFB' : '#FFFFFF',
+        bodyColor: isDark ? '#E5E7EB' : '#FFFFFF',
+        borderColor: isDark ? '#374151' : 'transparent',
+        borderWidth: isDark ? 1 : 0,
+        titleFont: { size: 12 },
+        bodyFont: { size: 12 },
+        padding: 10,
+        cornerRadius: 4,
+      },
+    },
+    scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          font: { size: 11 },
+          color: colors.neutral,
+        },
+      },
+      y: {
+        beginAtZero: false,
+        grid: {
+          color: colors.neutralLight,
+        },
+        ticks: {
+          font: { size: 11 },
+          color: colors.neutral,
+        },
+      },
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index',
+    },
+  }
 }
 
 // Format date for chart labels

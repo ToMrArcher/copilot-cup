@@ -92,26 +92,26 @@ export function WidgetPicker({ dashboardId, isOpen, onClose }: WidgetPickerProps
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4">
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={handleClose} />
+        <div className="fixed inset-0 bg-gray-500 dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-80" onClick={handleClose} />
         
-        <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full">
+        <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full">
           {/* Header */}
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <div className="flex items-center gap-2">
               {step !== 'type' && (
-                <button onClick={handleBack} className="text-gray-500 hover:text-gray-700">
+                <button onClick={handleBack} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
               )}
-              <h3 className="text-lg font-medium text-gray-900">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
                 {step === 'type' && 'Select Widget Type'}
                 {step === 'kpi' && 'Select KPI'}
                 {step === 'config' && 'Configure Widget'}
               </h3>
             </div>
-            <button onClick={handleClose} className="text-gray-400 hover:text-gray-500">
+            <button onClick={handleClose} className="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-300">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -127,11 +127,11 @@ export function WidgetPicker({ dashboardId, isOpen, onClose }: WidgetPickerProps
                   <button
                     key={type}
                     onClick={() => handleTypeSelect(type)}
-                    className="p-4 border rounded-lg text-left hover:border-violet-500 hover:bg-violet-50 transition-colors"
+                    className="p-4 border dark:border-gray-600 rounded-lg text-left hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/30 transition-colors"
                   >
                     <div className="text-2xl mb-2">{icon}</div>
-                    <div className="font-medium text-gray-900">{label}</div>
-                    <div className="text-sm text-gray-500">{description}</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{label}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">{description}</div>
                   </button>
                 ))}
               </div>
@@ -150,22 +150,22 @@ export function WidgetPicker({ dashboardId, isOpen, onClose }: WidgetPickerProps
                       <button
                         key={kpi.id}
                         onClick={() => handleKpiSelect(kpi.id)}
-                        className={`w-full p-4 border rounded-lg text-left hover:border-violet-500 hover:bg-violet-50 transition-colors ${
-                          selectedKpiId === kpi.id ? 'border-violet-500 bg-violet-50' : ''
+                        className={`w-full p-4 border rounded-lg text-left hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/30 transition-colors ${
+                          selectedKpiId === kpi.id ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/30' : 'dark:border-gray-600'
                         }`}
                       >
-                        <div className="font-medium text-gray-900">{kpi.name}</div>
+                        <div className="font-medium text-gray-900 dark:text-gray-100">{kpi.name}</div>
                         {kpi.description && (
-                          <div className="text-sm text-gray-500">{kpi.description}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{kpi.description}</div>
                         )}
-                        <div className="text-sm text-gray-400 mt-1">
-                          Formula: <code className="bg-gray-100 px-1 rounded">{kpi.formula}</code>
+                        <div className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                          Formula: <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">{kpi.formula}</code>
                         </div>
                       </button>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     No KPIs available. Create a KPI first.
                   </div>
                 )}
@@ -177,13 +177,13 @@ export function WidgetPicker({ dashboardId, isOpen, onClose }: WidgetPickerProps
               <div className="space-y-4">
                 {/* Format */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Value Format
                   </label>
                   <select
                     value={config.format || 'number'}
                     onChange={(e) => setConfig({ ...config, format: e.target.value as WidgetConfig['format'] })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2"
+                    className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2"
                   >
                     <option value="number">Number</option>
                     <option value="currency">Currency ($)</option>
@@ -200,7 +200,7 @@ export function WidgetPicker({ dashboardId, isOpen, onClose }: WidgetPickerProps
                     onChange={(e) => setConfig({ ...config, showTarget: e.target.checked })}
                     className="h-4 w-4 text-violet-600 rounded"
                   />
-                  <label htmlFor="showTarget" className="ml-2 text-sm text-gray-700">
+                  <label htmlFor="showTarget" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                     Show target value
                   </label>
                 </div>
@@ -208,13 +208,13 @@ export function WidgetPicker({ dashboardId, isOpen, onClose }: WidgetPickerProps
                 {/* Period (for charts) */}
                 {['line', 'bar', 'area', 'stat'].includes(selectedType || '') && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Time Period
                     </label>
                     <select
                       value={config.period || '30d'}
                       onChange={(e) => setConfig({ ...config, period: e.target.value })}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2"
                     >
                       <option value="7d">Last 7 days</option>
                       <option value="30d">Last 30 days</option>
@@ -229,10 +229,10 @@ export function WidgetPicker({ dashboardId, isOpen, onClose }: WidgetPickerProps
 
           {/* Footer */}
           {step === 'config' && (
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-2">
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
               <button
                 onClick={handleClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
               >
                 Cancel
               </button>

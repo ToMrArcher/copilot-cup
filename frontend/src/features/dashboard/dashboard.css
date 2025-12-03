@@ -2,7 +2,7 @@
  * Dashboard Grid Responsive Styles
  */
 
-/* Default: Desktop (12 columns) */
+/* Legacy static grid - kept for fallback */
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
@@ -34,12 +34,112 @@
   }
 }
 
+/* ===========================================
+   React Grid Layout Styles
+   =========================================== */
+
+/* Container for the draggable grid */
+.dashboard-grid-layout {
+  min-height: 200px;
+}
+
 /* Widget container styling */
 .dashboard-widget {
   min-height: 100px;
   transition: box-shadow 0.2s ease;
+  overflow: hidden;
 }
 
 .dashboard-widget:hover {
   z-index: 10;
+}
+
+/* Ensure widgets fill their grid cell */
+.react-grid-item > .dashboard-widget {
+  height: 100%;
+  width: 100%;
+}
+
+/* Dragging state */
+.react-grid-item.react-draggable-dragging {
+  z-index: 100;
+  opacity: 0.9;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.dark .react-grid-item.react-draggable-dragging {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.react-grid-item.react-draggable-dragging > .dashboard-widget {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.dark .react-grid-item.react-draggable-dragging > .dashboard-widget {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Placeholder during drag */
+.react-grid-placeholder {
+  background: rgba(139, 92, 246, 0.15) !important;
+  border: 2px dashed rgb(139, 92, 246) !important;
+  border-radius: 0.5rem;
+  opacity: 1 !important;
+}
+
+.dark .react-grid-placeholder {
+  background: rgba(139, 92, 246, 0.25) !important;
+}
+
+/* Resizing state */
+.react-grid-item.resizing {
+  z-index: 100;
+  opacity: 0.9;
+}
+
+/* Resize handle styling */
+.react-grid-item > .react-resizable-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.react-grid-item:hover > .react-resizable-handle {
+  opacity: 1;
+}
+
+.react-grid-item > .react-resizable-handle::after {
+  content: '';
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid rgba(139, 92, 246, 0.6);
+  border-bottom: 2px solid rgba(139, 92, 246, 0.6);
+}
+
+/* Animation for grid items repositioning */
+.react-grid-item {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.react-grid-item.cssTransforms {
+  transition-property: transform;
+}
+
+.react-grid-item.react-draggable-dragging,
+.react-grid-item.resizing {
+  transition: none;
+}
+
+/* Read-only mode - hide handles */
+.dashboard-widget.readonly .widget-drag-handle,
+.react-grid-item.static > .react-resizable-handle {
+  display: none !important;
 }

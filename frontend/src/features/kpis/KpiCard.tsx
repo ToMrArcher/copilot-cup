@@ -44,10 +44,10 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
 
   // Determine status color
   const getStatusColor = (): string => {
-    if (kpi.calculationError) return 'text-red-600'
-    if (kpi.onTrack === true) return 'text-green-600'
-    if (kpi.onTrack === false) return 'text-amber-600'
-    return 'text-gray-600'
+    if (kpi.calculationError) return 'text-red-600 dark:text-red-400'
+    if (kpi.onTrack === true) return 'text-green-600 dark:text-green-400'
+    if (kpi.onTrack === false) return 'text-amber-600 dark:text-amber-400'
+    return 'text-gray-600 dark:text-gray-400'
   }
 
   // Get progress bar color
@@ -67,20 +67,20 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow cursor-pointer"
+      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow cursor-pointer"
     >
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="font-medium text-gray-900 text-lg">{kpi.name}</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 text-lg">{kpi.name}</h3>
           {kpi.description && (
-            <p className="text-sm text-gray-500 mt-1">{kpi.description}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{kpi.description}</p>
           )}
         </div>
         <div className="flex gap-2">
           <button
             onClick={handleShare}
-            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+            className="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded"
             title="Share"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,7 +90,7 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
           <button
             onClick={handleRecalculate}
             disabled={recalculate.isPending}
-            className="p-1.5 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded"
+            className="p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/30 rounded"
             title="Recalculate"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,7 +100,7 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
           <button
             onClick={handleDelete}
             disabled={deleteKpi.isPending}
-            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
+            className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
             title="Delete"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -127,12 +127,12 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
       {kpi.targetValue && kpi.progress !== null && kpi.progress !== undefined && (
         <div className="mb-4">
           <div className="flex justify-between text-sm mb-1">
-            <span className="text-gray-500">Progress</span>
+            <span className="text-gray-500 dark:text-gray-400">Progress</span>
             <span className={`font-medium ${getStatusColor()}`}>
               {kpi.progress.toFixed(1)}%
             </span>
           </div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${getProgressColor()}`}
               style={{ width: `${Math.min(100, Math.max(0, kpi.progress))}%` }}
@@ -143,10 +143,10 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
 
       {/* Target Info */}
       {kpi.targetValue && (
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           <span>Target: {formatValue(kpi.targetValue)}</span>
           {kpi.targetPeriod && (
-            <span className="px-2 py-0.5 bg-gray-100 rounded text-xs">
+            <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">
               {kpi.targetPeriod}
             </span>
           )}
@@ -154,8 +154,8 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
       )}
 
       {/* Formula */}
-      <div className="mt-4 pt-3 border-t border-gray-100">
-        <code className="text-xs text-gray-400 font-mono">{kpi.formula}</code>
+      <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+        <code className="text-xs text-gray-400 dark:text-gray-500 font-mono">{kpi.formula}</code>
       </div>
 
       {/* Sources */}
@@ -164,7 +164,7 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
           {kpi.sources.map(source => (
             <span
               key={source.id}
-              className="px-2 py-0.5 bg-violet-50 text-violet-700 rounded text-xs"
+              className="px-2 py-0.5 bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded text-xs"
             >
               {source.alias || source.dataField.name}
             </span>
@@ -174,7 +174,7 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
 
       {/* Updated timestamp */}
       {kpi.calculatedAt && (
-        <div className="mt-3 text-xs text-gray-400">
+        <div className="mt-3 text-xs text-gray-400 dark:text-gray-500">
           Updated: {new Date(kpi.calculatedAt).toLocaleString()}
         </div>
       )}

@@ -106,8 +106,8 @@ export function IntegrationList() {
     <div className="px-4 py-6 sm:px-0">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Integrations</h1>
-          <p className="text-gray-600 mt-1">Connect your data sources</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Integrations</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Connect your data sources</p>
         </div>
         <Link
           to="/integrations/new"
@@ -118,13 +118,13 @@ export function IntegrationList() {
       </div>
 
       {integrations.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg border-2 border-dashed border-gray-300">
+        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
           <span className="text-4xl">🔌</span>
-          <h3 className="mt-4 text-lg font-medium text-gray-900">No integrations yet</h3>
-          <p className="mt-2 text-gray-500">Get started by adding your first data source.</p>
+          <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">No integrations yet</h3>
+          <p className="mt-2 text-gray-500 dark:text-gray-400">Get started by adding your first data source.</p>
           <Link
             to="/integrations/new"
-            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-violet-700 bg-violet-100 hover:bg-violet-200"
+            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-violet-700 dark:text-violet-300 bg-violet-100 dark:bg-violet-900/30 hover:bg-violet-200 dark:hover:bg-violet-900/50"
           >
             + Add Integration
           </Link>
@@ -134,7 +134,7 @@ export function IntegrationList() {
           {integrations.map(integration => (
             <div key={integration.id} className="relative">
               {actionId === integration.id && (
-                <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 rounded-lg">
+                <div className="absolute inset-0 bg-white/50 dark:bg-gray-900/50 flex items-center justify-center z-10 rounded-lg">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
                 </div>
               )}
