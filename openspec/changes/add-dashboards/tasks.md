@@ -30,13 +30,13 @@
   - `PUT /api/dashboards/:id/layout` - Batch update positions
   - Support responsive breakpoints (lg, md, sm)
 
-## Phase 3: Frontend - Chart Library Setup
-- [ ] **3.1 Install Dependencies**
+## Phase 3: Frontend - Chart Library Setup ✅
+- [x] **3.1 Install Dependencies**
   - Install `chart.js` and `react-chartjs-2`
   - Install `react-grid-layout`
   - Configure Chart.js defaults (colors, fonts)
 
-- [ ] **3.2 Chart Components**
+- [x] **3.2 Chart Components**
   - Create `LineChart` component
   - Create `BarChart` component
   - Create `AreaChart` component
