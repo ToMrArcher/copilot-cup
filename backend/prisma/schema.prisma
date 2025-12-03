@@ -149,17 +149,22 @@ model Widget {
 // ==========================================
 
 model ShareLink {
-  id           String     @id @default(cuid())
-  token        String     @unique
-  resourceType String     // dashboard, kpi
-  dashboardId  String?
-  dashboard    Dashboard? @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
-  kpiId        String?
-  kpi          Kpi?       @relation(fields: [kpiId], references: [id], onDelete: Cascade)
-  createdById  String
-  createdBy    User       @relation(fields: [createdById], references: [id])
-  showTarget   Boolean    @default(true)
-  expiresAt    DateTime?
-  active       Boolean    @default(true)
-  createdAt    DateTime   @default(now())
+  id             String     @id @default(cuid())
+  token          String     @unique
+  name           String?    // Optional friendly name
+  resourceType   String     // dashboard, kpi
+  dashboardId    String?
+  dashboard      Dashboard? @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+  kpiId          String?
+  kpi            Kpi?       @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  createdById    String
+  createdBy      User       @relation(fields: [createdById], references: [id])
+  showTarget     Boolean    @default(true)
+  expiresAt      DateTime?
+  active         Boolean    @default(true)
+  accessCount    Int        @default(0)
+  lastAccessedAt DateTime?
+  createdAt      DateTime   @default(now())
+
+  @@index([createdById])
 }

@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import type { Kpi } from '../../types/kpi'
 import { useDeleteKpi, useRecalculateKpi } from '../../hooks/useKpis'
+import { CreateShareModal } from '../sharing/CreateShareModal'
 
 interface KpiCardProps {
   kpi: Kpi
@@ -9,6 +11,12 @@ interface KpiCardProps {
 export function KpiCard({ kpi, onClick }: KpiCardProps) {
   const deleteKpi = useDeleteKpi()
   const recalculate = useRecalculateKpi()
+  const [showShareModal, setShowShareModal] = useState(false)
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setShowShareModal(true)
+  }
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -70,6 +78,15 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
           )}
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={handleShare}
+            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+            title="Share"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+          </button>
           <button
             onClick={handleRecalculate}
             disabled={recalculate.isPending}
@@ -160,6 +177,17 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
         <div className="mt-3 text-xs text-gray-400">
           Updated: {new Date(kpi.calculatedAt).toLocaleString()}
         </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <CreateShareModal
+          isOpen={showShareModal}
+          resourceType="kpi"
+          resourceId={kpi.id}
+          resourceName={kpi.name}
+          onClose={() => setShowShareModal(false)}
+        />
       )}
     </div>
   )

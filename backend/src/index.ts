@@ -7,6 +7,8 @@ import { integrationRouter } from './modules/integrations/integration.router'
 import { kpiRouter } from './modules/kpi'
 import { dashboardRouter } from './modules/dashboard/dashboard.router'
 import { authRouter } from './modules/auth/auth.router'
+import { sharingRouter } from './modules/sharing/sharing.router'
+import { shareRouter } from './modules/sharing/share.router'
 
 // Load environment variables
 dotenv.config()
@@ -28,10 +30,8 @@ app.use('/api/auth', authRouter)
 app.use('/api/integrations', integrationRouter)
 app.use('/api/kpis', kpiRouter)
 app.use('/api/dashboards', dashboardRouter)
-
-app.get('/api/sharing', (_req, res) => {
-  res.json({ message: 'Sharing module - coming soon' })
-})
+app.use('/api/sharing', sharingRouter)
+app.use('/api/share', shareRouter)  // Public route for accessing shared resources
 
 // Start server
 app.listen(PORT, () => {

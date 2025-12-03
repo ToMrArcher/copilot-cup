@@ -1,12 +1,6 @@
-// Placeholder for sharing module
-// This module will handle external share links
+// Sharing module
+// Handles external share links for dashboards and KPIs
 
-export interface ShareLink {
-  id: string
-  resourceType: 'dashboard' | 'kpi'
-  resourceId: string
-  token: string
-  expiresAt?: Date
-  active: boolean
-  createdAt: Date
-}
+export { sharingRouter } from './sharing.router'
+export { shareRouter } from './share.router'
+

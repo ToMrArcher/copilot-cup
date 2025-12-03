@@ -32,6 +32,15 @@ import type {
   UpdateRoleRequest,
   UpdateRoleResponse,
 } from '../types/auth'
+import type {
+  ShareLink,
+  CreateShareLinkRequest,
+  CreateShareLinkResponse,
+  UpdateShareLinkRequest,
+  UpdateShareLinkResponse,
+  ListShareLinksResponse,
+  SharedResourceResponse,
+} from '../types/sharing'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
@@ -370,4 +379,47 @@ export const dashboardsApi = {
     fetchApi<void>(`/api/dashboards/${dashboardId}/widgets/${widgetId}`, {
       method: 'DELETE',
     }),
+}
+
+// ==========================================
+// Sharing API
+// ==========================================
+
+export const sharingApi = {
+  // Create share link
+  create: (data: CreateShareLinkRequest) =>
+    fetchApi<CreateShareLinkResponse>('/api/sharing', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // List share links
+  list: (resourceType?: 'dashboard' | 'kpi', resourceId?: string) => {
+    const params = new URLSearchParams()
+    if (resourceType) params.set('resourceType', resourceType)
+    if (resourceId) params.set('resourceId', resourceId)
+    const query = params.toString()
+    return fetchApi<ListShareLinksResponse>(`/api/sharing${query ? `?${query}` : ''}`)
+  },
+
+  // Get share link details
+  get: (id: string) =>
+    fetchApi<ShareLink>(`/api/sharing/${id}`),
+
+  // Update share link
+  update: (id: string, data: UpdateShareLinkRequest) =>
+    fetchApi<UpdateShareLinkResponse>(`/api/sharing/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  // Delete share link
+  delete: (id: string) =>
+    fetchApi<void>(`/api/sharing/${id}`, {
+      method: 'DELETE',
+    }),
+
+  // Access shared resource (public, no auth required)
+  accessShared: (token: string) =>
+    fetchApi<SharedResourceResponse>(`/api/share/${token}`),
 }

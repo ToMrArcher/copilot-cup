@@ -3,8 +3,10 @@
  * Renders widgets in a grid layout with KPI data
  */
 
+import { useState } from 'react'
 import { useDashboard, useDeleteWidget, useUpdateLayout, useKpiHistory } from '../../hooks/useDashboards'
 import { NumberWidget, StatWidget, GaugeWidget, ChartWidget } from './widgets'
+import { CreateShareModal } from '../sharing/CreateShareModal'
 import type { Widget, WidgetType } from '../../types/dashboard'
 import './dashboard.css'
 
@@ -17,6 +19,7 @@ interface DashboardViewProps {
 export function DashboardView({ dashboardId, onBack, onAddWidget }: DashboardViewProps) {
   const { data: dashboard, isLoading, error } = useDashboard(dashboardId)
   const deleteWidget = useDeleteWidget()
+  const [showShareModal, setShowShareModal] = useState(false)
 
   const handleDeleteWidget = async (widgetId: string) => {
     if (!confirm('Delete this widget?')) return
@@ -62,15 +65,26 @@ export function DashboardView({ dashboardId, onBack, onAddWidget }: DashboardVie
           </button>
           <h1 className="text-2xl font-bold text-gray-900">{dashboard.name}</h1>
         </div>
-        <button
-          onClick={onAddWidget}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-violet-600 hover:bg-violet-700"
-        >
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Add Widget
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowShareModal(true)}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+            Share
+          </button>
+          <button
+            onClick={onAddWidget}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-violet-600 hover:bg-violet-700"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add Widget
+          </button>
+        </div>
       </div>
 
       {/* Widgets Grid - Responsive */}
@@ -103,6 +117,17 @@ export function DashboardView({ dashboardId, onBack, onAddWidget }: DashboardVie
             </button>
           </div>
         </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <CreateShareModal
+          isOpen={showShareModal}
+          resourceType="dashboard"
+          resourceId={dashboardId}
+          resourceName={dashboard.name}
+          onClose={() => setShowShareModal(false)}
+        />
       )}
     </div>
   )

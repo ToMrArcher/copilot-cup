@@ -1,153 +1,153 @@
 # Tasks: External Sharing System
 
-## Status: 🚧 IN PROGRESS
+## Status: ✅ COMPLETE
 
 ---
 
 ## Phase 1: Database & Service Layer
 
 ### 1.1 Database Migration
-- [ ] Add `name` field to ShareLink model
-- [ ] Add `accessCount` field (default: 0)
-- [ ] Add `lastAccessedAt` field
-- [ ] Add index on `createdById`
-- [ ] Run migration
+- [x] Add `name` field to ShareLink model
+- [x] Add `accessCount` field (default: 0)
+- [x] Add `lastAccessedAt` field
+- [x] Add index on `createdById`
+- [x] Run migration
 
 ### 1.2 Sharing Service
-- [ ] Create `sharing.service.ts`
-- [ ] Implement `generateShareToken()` with crypto
-- [ ] Implement `verifyShareToken()` with HMAC
-- [ ] Implement `calculateExpiration()` helper
-- [ ] Add `SHARE_LINK_SECRET` to environment
-- [ ] Write unit tests for token generation/verification
+- [x] Create `sharing.service.ts`
+- [x] Implement `generateShareToken()` with crypto
+- [x] Implement `verifyShareToken()` with HMAC
+- [x] Implement `calculateExpiration()` helper
+- [x] Add `SHARE_LINK_SECRET` to environment
+- [x] Write unit tests for token generation/verification
 
 ---
 
 ## Phase 2: Backend API - Protected Routes
 
 ### 2.1 Create Share Link
-- [ ] `POST /api/sharing` endpoint
-- [ ] Validate resourceType (dashboard | kpi)
-- [ ] Verify user has access to resource
-- [ ] Generate secure token
-- [ ] Store in database
-- [ ] Return full URL
+- [x] `POST /api/sharing` endpoint
+- [x] Validate resourceType (dashboard | kpi)
+- [x] Verify user has access to resource
+- [x] Generate secure token
+- [x] Store in database
+- [x] Return full URL
 
 ### 2.2 List Share Links
-- [ ] `GET /api/sharing` endpoint
-- [ ] Filter by createdById (current user)
-- [ ] Optional filter by resourceType
-- [ ] Optional filter by resourceId
-- [ ] Include resource name in response
-- [ ] Include access statistics
+- [x] `GET /api/sharing` endpoint
+- [x] Filter by createdById (current user)
+- [x] Optional filter by resourceType
+- [x] Optional filter by resourceId
+- [x] Include resource name in response
+- [x] Include access statistics
 
 ### 2.3 Get Share Link Details
-- [ ] `GET /api/sharing/:id` endpoint
-- [ ] Verify ownership
-- [ ] Return full details with stats
+- [x] `GET /api/sharing/:id` endpoint
+- [x] Verify ownership
+- [x] Return full details with stats
 
 ### 2.4 Update Share Link
-- [ ] `PATCH /api/sharing/:id` endpoint
-- [ ] Verify ownership
-- [ ] Allow updating: name, active, expiresAt, showTarget
-- [ ] Return updated link
+- [x] `PATCH /api/sharing/:id` endpoint
+- [x] Verify ownership
+- [x] Allow updating: name, active, expiresAt, showTarget
+- [x] Return updated link
 
 ### 2.5 Delete Share Link
-- [ ] `DELETE /api/sharing/:id` endpoint
-- [ ] Verify ownership
-- [ ] Hard delete from database
-- [ ] Return 204 No Content
+- [x] `DELETE /api/sharing/:id` endpoint
+- [x] Verify ownership
+- [x] Hard delete from database
+- [x] Return 204 No Content
 
 ---
 
 ## Phase 3: Backend API - Public Access
 
 ### 3.1 Access Shared Resource
-- [ ] `GET /api/share/:token` endpoint
-- [ ] Verify token signature
-- [ ] Check if link is active
-- [ ] Check if link is expired
-- [ ] Increment access count
-- [ ] Update lastAccessedAt
-- [ ] Return resource data
+- [x] `GET /api/share/:token` endpoint
+- [x] Verify token signature
+- [x] Check if link is active
+- [x] Check if link is expired
+- [x] Increment access count
+- [x] Update lastAccessedAt
+- [x] Return resource data
 
 ### 3.2 Dashboard Response
-- [ ] Fetch dashboard with widgets
-- [ ] Fetch KPIs for each widget
-- [ ] Filter out target fields if showTarget=false
-- [ ] Include layout and positions
+- [x] Fetch dashboard with widgets
+- [x] Fetch KPIs for each widget
+- [x] Filter out target fields if showTarget=false
+- [x] Include layout and positions
 
 ### 3.3 KPI Response
-- [ ] Fetch KPI with current value
-- [ ] Calculate comparison to previous period
-- [ ] Fetch history data (last 30 days)
-- [ ] Filter out target fields if showTarget=false
+- [x] Fetch KPI with current value
+- [x] Calculate comparison to previous period
+- [x] Fetch history data (last 30 days)
+- [x] Filter out target fields if showTarget=false
 
 ### 3.4 Error Handling
-- [ ] Return 404 for invalid token
-- [ ] Return 410 Gone for expired links
-- [ ] Return 410 Gone for inactive links
-- [ ] Return appropriate error messages
+- [x] Return 404 for invalid token
+- [x] Return 410 Gone for expired links
+- [x] Return 410 Gone for inactive links
+- [x] Return appropriate error messages
 
 ---
 
 ## Phase 4: Frontend - Types & API
 
 ### 4.1 TypeScript Types
-- [ ] Create `types/sharing.ts`
-- [ ] Define `ShareLink` interface
-- [ ] Define request/response types
-- [ ] Define error types
+- [x] Create `types/sharing.ts`
+- [x] Define `ShareLink` interface
+- [x] Define request/response types
+- [x] Define error types
 
 ### 4.2 API Client
-- [ ] Add sharing endpoints to `lib/api.ts`
-- [ ] `createShareLink()`
-- [ ] `listShareLinks()`
-- [ ] `getShareLink()`
-- [ ] `updateShareLink()`
-- [ ] `deleteShareLink()`
-- [ ] `accessSharedResource()`
+- [x] Add sharing endpoints to `lib/api.ts`
+- [x] `createShareLink()`
+- [x] `listShareLinks()`
+- [x] `getShareLink()`
+- [x] `updateShareLink()`
+- [x] `deleteShareLink()`
+- [x] `accessSharedResource()`
 
 ### 4.3 React Query Hooks
-- [ ] Create `hooks/useSharing.ts`
-- [ ] `useShareLinks()` - list query
-- [ ] `useShareLink()` - single query
-- [ ] `useCreateShareLink()` - mutation
-- [ ] `useUpdateShareLink()` - mutation
-- [ ] `useDeleteShareLink()` - mutation
-- [ ] `useSharedResource()` - public access query
+- [x] Create `hooks/useSharing.ts`
+- [x] `useShareLinks()` - list query
+- [x] `useShareLink()` - single query
+- [x] `useCreateShareLink()` - mutation
+- [x] `useUpdateShareLink()` - mutation
+- [x] `useDeleteShareLink()` - mutation
+- [x] `useSharedResource()` - public access query
 
 ---
 
 ## Phase 5: Frontend - Management UI
 
 ### 5.1 SharingPage
-- [ ] Replace placeholder with full implementation
-- [ ] List all user's share links
-- [ ] Filter by type (all, dashboard, kpi)
-- [ ] Filter by status (all, active, expired)
-- [ ] Empty state with helpful message
-- [ ] Loading and error states
+- [x] Replace placeholder with full implementation
+- [x] List all user's share links
+- [x] Filter by type (all, dashboard, kpi)
+- [x] Filter by status (all, active, expired)
+- [x] Empty state with helpful message
+- [x] Loading and error states
 
 ### 5.2 ShareLinkCard
-- [ ] Display resource type icon
-- [ ] Display resource name and link name
-- [ ] Status badge (active/expired/inactive)
-- [ ] Expiration with relative time
-- [ ] Access count display
-- [ ] Copy URL button with toast feedback
-- [ ] Toggle active/inactive
-- [ ] Delete with confirmation
+- [x] Display resource type icon
+- [x] Display resource name and link name
+- [x] Status badge (active/expired/inactive)
+- [x] Expiration with relative time
+- [x] Access count display
+- [x] Copy URL button with toast feedback
+- [x] Toggle active/inactive
+- [x] Delete with confirmation
 
 ### 5.3 CreateShareModal
-- [ ] Modal with form
-- [ ] Name input (optional)
-- [ ] Expiration dropdown (1h, 24h, 7d, 30d, never)
-- [ ] Show target checkbox (default: true)
-- [ ] Generate button
-- [ ] Display generated URL
-- [ ] Copy button
-- [ ] Close/Done button
+- [x] Modal with form
+- [x] Name input (optional)
+- [x] Expiration dropdown (1h, 24h, 7d, 30d, never)
+- [x] Show target checkbox (default: true)
+- [x] Generate button
+- [x] Display generated URL
+- [x] Copy button
+- [x] Close/Done button
 
 ### 5.4 Share Buttons
 - [ ] Add Share button to Dashboard page
@@ -159,40 +159,40 @@
 ## Phase 6: Frontend - Public Views
 
 ### 6.1 Routing
-- [ ] Add `/share/:token` route
-- [ ] Route renders SharedView component
-- [ ] No auth wrapper on this route
+- [x] Add `/share/:token` route
+- [x] Route renders SharedView component
+- [x] No auth wrapper on this route
 
 ### 6.2 SharedView Container
-- [ ] Fetch shared resource using token
-- [ ] Determine resource type
-- [ ] Render appropriate view component
-- [ ] Handle loading state
-- [ ] Handle error states (expired, inactive, not found)
+- [x] Fetch shared resource using token
+- [x] Determine resource type
+- [x] Render appropriate view component
+- [x] Handle loading state
+- [x] Handle error states (expired, inactive, not found)
 
 ### 6.3 SharedDashboardView
-- [ ] Minimal branded header
-- [ ] Dashboard name
-- [ ] Grid layout with widgets
-- [ ] Widgets display KPI data
-- [ ] Respect showTarget setting
+- [x] Minimal branded header
+- [x] Dashboard name
+- [x] Grid layout with widgets
+- [x] Widgets display KPI data
+- [x] Respect showTarget setting
 - [ ] Expiration warning if < 24h remaining
-- [ ] Read-only (no interactions)
+- [x] Read-only (no interactions)
 
 ### 6.4 SharedKpiView
-- [ ] Minimal branded header
-- [ ] KPI name and description
-- [ ] Large current value display
-- [ ] Target info (if showTarget=true)
-- [ ] Comparison to previous period
-- [ ] History chart (line chart)
+- [x] Minimal branded header
+- [x] KPI name and description
+- [x] Large current value display
+- [x] Target info (if showTarget=true)
+- [x] Comparison to previous period
+- [x] History chart (line chart)
 - [ ] Expiration warning if applicable
 
 ### 6.5 Error Pages
-- [ ] Expired link page with message
-- [ ] Inactive link page with message
-- [ ] Not found page
-- [ ] Consistent styling with main app
+- [x] Expired link page with message
+- [x] Inactive link page with message
+- [x] Not found page
+- [x] Consistent styling with main app
 
 ---
 

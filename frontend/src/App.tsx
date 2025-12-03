@@ -5,7 +5,7 @@ import { KpiPage } from './features/kpi/KpiPage'
 import { IntegrationsPage } from './features/integrations/IntegrationsPage'
 import { IntegrationWizard } from './features/integrations/IntegrationWizard'
 import { AuthPage, AuthProvider, ProtectedRoute, ProfilePage, AdminUsersPage } from './features/auth'
-import { SharingPage } from './features/sharing/SharingPage'
+import { SharingPage, PublicShareView } from './features/sharing'
 
 function App() {
   return (
@@ -74,6 +74,9 @@ function App() {
             {/* Public Routes */}
             <Route path="auth" element={<AuthPage />} />
           </Route>
+
+          {/* Public Share Routes (outside Layout) */}
+          <Route path="share/:token" element={<PublicShareView />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
