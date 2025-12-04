@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { IntegrationCard } from './IntegrationCard'
 import { ManualDataEntryModal } from './ManualDataEntryModal'
 import type { Integration } from '../../types/integration'
@@ -38,6 +38,7 @@ const mockIntegrations: Integration[] = [
 ]
 
 export function IntegrationList() {
+  const navigate = useNavigate()
   const { data: apiIntegrations, isLoading, error } = useIntegrations()
   const deleteIntegration = useDeleteIntegration()
   const [actionId, setActionId] = useState<string | null>(null)
@@ -81,8 +82,7 @@ export function IntegrationList() {
   }
 
   const handleEdit = (id: string) => {
-    // TODO: Navigate to edit wizard
-    console.log('Edit', id)
+    navigate(`/integrations/${id}/edit`)
   }
 
   const handleDelete = async (id: string) => {

@@ -6,6 +6,7 @@ import { KpiWizard } from './KpiWizard'
 export function KpiList() {
   const { data: kpis, isLoading, error } = useKpis()
   const [showWizard, setShowWizard] = useState(false)
+  const [editingKpiId, setEditingKpiId] = useState<string | null>(null)
 
   if (isLoading) {
     return (
@@ -71,7 +72,7 @@ export function KpiList() {
       {kpis && kpis.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {kpis.map(kpi => (
-            <KpiCard key={kpi.id} kpi={kpi} />
+            <KpiCard key={kpi.id} kpi={kpi} onEdit={(id) => setEditingKpiId(id)} />
           ))}
         </div>
       ) : (
@@ -103,8 +104,14 @@ export function KpiList() {
       )}
 
       {/* Wizard Modal */}
-      {showWizard && (
-        <KpiWizard onClose={() => setShowWizard(false)} />
+      {(showWizard || editingKpiId) && (
+        <KpiWizard 
+          kpiId={editingKpiId || undefined}
+          onClose={() => { 
+            setShowWizard(false)
+            setEditingKpiId(null)
+          }} 
+        />
       )}
     </div>
   )

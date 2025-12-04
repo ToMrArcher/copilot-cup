@@ -49,6 +49,14 @@ function App() {
                 }
               />
               <Route
+                path="integrations/:id/edit"
+                element={
+                  <ProtectedRoute>
+                    <IntegrationWizard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="sharing"
                 element={
                   <ProtectedRoute>

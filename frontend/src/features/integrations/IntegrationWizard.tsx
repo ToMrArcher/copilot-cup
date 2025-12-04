@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import type { IntegrationType, IntegrationConfig, FieldSchema, DataField } from '../../types/integration'
 import { SelectTypeStep } from './wizard/SelectTypeStep'
 import { ConfigureConnectionStep } from './wizard/ConfigureConnectionStep'
@@ -40,10 +40,44 @@ const steps: { id: WizardStep; label: string }[] = [
 
 export function IntegrationWizard() {
   const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
+  const isEditMode = !!id
+  
   const [currentStep, setCurrentStep] = useState<WizardStep>('type')
   const [data, setData] = useState<WizardData>(initialData)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDiscovering, setIsDiscovering] = useState(false)
+  const [isLoading, setIsLoading] = useState(isEditMode)
+
+  // Load existing integration data in edit mode
+  useEffect(() => {
+    if (id) {
+      setIsLoading(true)
+      integrationsApi.getById(id)
+        .then((integration) => {
+          setData({
+            state: {
+              name: integration.name,
+              type: integration.type as IntegrationType,
+              config: integration.config as IntegrationConfig,
+            },
+            discoveredFields: [],
+            selectedFields: integration.dataFields?.map(f => ({
+              id: f.id,
+              sourceField: f.path,
+              targetField: f.name,
+              fieldType: f.dataType,
+            })) || [],
+          })
+        })
+        .catch((error) => {
+          console.error('Failed to load integration:', error)
+          alert('Failed to load integration')
+          navigate('/integrations')
+        })
+        .finally(() => setIsLoading(false))
+    }
+  }, [id, navigate])
 
   const currentStepIndex = steps.findIndex(s => s.id === currentStep)
 
@@ -96,18 +130,31 @@ export function IntegrationWizard() {
 
     setIsSubmitting(true)
     try {
-      // Create the integration
-      const integration = await integrationsApi.create({
-        name: data.state.name,
-        type: data.state.type,
-        config: data.state.config as Record<string, unknown>,
-      })
+      let integrationId: string
 
-      // Create field mappings if any
+      if (isEditMode && id) {
+        // Update existing integration
+        await integrationsApi.update(id, {
+          name: data.state.name,
+          config: data.state.config as Record<string, unknown>,
+        })
+        integrationId = id
+      } else {
+        // Create the integration
+        const integration = await integrationsApi.create({
+          name: data.state.name,
+          type: data.state.type,
+          config: data.state.config as Record<string, unknown>,
+        })
+        integrationId = integration.id
+      }
+
+      // Create field mappings if any (for new fields)
       if (data.selectedFields.length > 0) {
         for (const field of data.selectedFields) {
-          if (field.sourceField && field.targetField && field.fieldType) {
-            await dataFieldsApi.create(integration.id, {
+          // Only create fields that don't have an id (new fields)
+          if (!field.id && field.sourceField && field.targetField && field.fieldType) {
+            await dataFieldsApi.create(integrationId, {
               name: field.targetField,
               path: field.sourceField,
               dataType: field.fieldType.toLowerCase(),
@@ -118,8 +165,8 @@ export function IntegrationWizard() {
 
       navigate('/integrations')
     } catch (error) {
-      console.error('Failed to create integration:', error)
-      alert('Failed to create integration: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      console.error(`Failed to ${isEditMode ? 'update' : 'create'} integration:`, error)
+      alert(`Failed to ${isEditMode ? 'update' : 'create'} integration: ` + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setIsSubmitting(false)
     }
@@ -143,8 +190,23 @@ export function IntegrationWizard() {
     }
   }
 
+  if (isLoading) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
+      {/* Header */}
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+        {isEditMode ? 'Edit Integration' : 'New Integration'}
+      </h1>
+      
       {/* Progress Steps */}
       <nav aria-label="Progress" className="mb-8">
         <ol className="flex items-center">
@@ -234,7 +296,9 @@ export function IntegrationWizard() {
             disabled={isSubmitting}
             className="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700 disabled:opacity-50"
           >
-            {isSubmitting ? 'Creating...' : 'Create Integration'}
+            {isSubmitting 
+              ? (isEditMode ? 'Saving...' : 'Creating...') 
+              : (isEditMode ? 'Save Changes' : 'Create Integration')}
           </button>
         ) : (
           <button

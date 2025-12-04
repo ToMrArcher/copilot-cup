@@ -1,9 +1,10 @@
-import { useState } from 'react'
-import { useAvailableFields, useCreateKpi, useValidateFormula } from '../../hooks/useKpis'
-import type { CreateKpiRequest, AvailableField, IntegrationWithFields } from '../../types/kpi'
+import { useState, useEffect } from 'react'
+import { useAvailableFields, useCreateKpi, useUpdateKpi, useKpi, useValidateFormula } from '../../hooks/useKpis'
+import type { CreateKpiRequest, UpdateKpiRequest, AvailableField, IntegrationWithFields } from '../../types/kpi'
 
 interface KpiWizardProps {
   onClose: () => void
+  kpiId?: string  // If provided, edit mode
 }
 
 type WizardStep = 1 | 2 | 3 | 4
@@ -15,7 +16,8 @@ interface SelectedSource {
   integrationName: string
 }
 
-export function KpiWizard({ onClose }: KpiWizardProps) {
+export function KpiWizard({ onClose, kpiId }: KpiWizardProps) {
+  const isEditMode = !!kpiId
   const [step, setStep] = useState<WizardStep>(1)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -25,10 +27,56 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
   const [targetValue, setTargetValue] = useState<string>('')
   const [targetDirection, setTargetDirection] = useState<'increase' | 'decrease'>('increase')
   const [targetPeriod, setTargetPeriod] = useState<string>('monthly')
+  const [isInitialized, setIsInitialized] = useState(!isEditMode)
 
   const { data: availableFields, isLoading: fieldsLoading } = useAvailableFields()
+  const { data: existingKpi, isLoading: kpiLoading } = useKpi(kpiId || '')
   const createKpi = useCreateKpi()
+  const updateKpi = useUpdateKpi()
   const validateFormula = useValidateFormula()
+
+  // Initialize form with existing KPI data in edit mode
+  useEffect(() => {
+    if (isEditMode && existingKpi && availableFields && !isInitialized) {
+      setName(existingKpi.name)
+      setDescription(existingKpi.description || '')
+      setFormula(existingKpi.formula)
+      setTargetValue(existingKpi.targetValue?.toString() || '')
+      setTargetDirection(existingKpi.targetDirection || 'increase')
+      
+      // Map existing sources to selectedSources format
+      const sources: SelectedSource[] = existingKpi.sources?.map(source => {
+        // Find the matching field in available fields
+        let fieldInfo: AvailableField | undefined
+        let integrationName = ''
+        
+        for (const integration of availableFields.integrations) {
+          const field = integration.fields.find(f => f.id === source.dataField?.id)
+          if (field) {
+            fieldInfo = field
+            integrationName = integration.integration.name
+            break
+          }
+        }
+
+        return {
+          dataFieldId: source.dataField?.id || '',
+          alias: source.alias || source.dataField?.name || '',
+          field: fieldInfo || {
+            id: source.dataField?.id || '',
+            name: source.dataField?.name || '',
+            path: source.dataField?.path || '',
+            dataType: source.dataField?.dataType || 'number',
+            hasData: true,
+          },
+          integrationName,
+        }
+      }) || []
+      
+      setSelectedSources(sources)
+      setIsInitialized(true)
+    }
+  }, [isEditMode, existingKpi, availableFields, isInitialized])
 
   const handleSourceToggle = (field: AvailableField, integration: IntegrationWithFields['integration']) => {
     const existing = selectedSources.find(s => s.dataFieldId === field.id)
@@ -96,24 +144,37 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
   }
 
   const handleCreate = async () => {
-    const data: CreateKpiRequest = {
-      name: name.trim(),
-      description: description.trim() || undefined,
-      formula: formula.trim(),
-      sources: selectedSources.map(s => ({
-        dataFieldId: s.dataFieldId,
-        alias: s.alias,
-      })),
-      targetValue: targetValue ? parseFloat(targetValue) : undefined,
-      targetDirection,
-      targetPeriod,
-    }
+    const sources = selectedSources.map(s => ({
+      dataFieldId: s.dataFieldId,
+      alias: s.alias,
+    }))
 
     try {
-      await createKpi.mutateAsync(data)
+      if (isEditMode && kpiId) {
+        const data: UpdateKpiRequest = {
+          name: name.trim(),
+          description: description.trim() || undefined,
+          formula: formula.trim(),
+          sources,
+          targetValue: targetValue ? parseFloat(targetValue) : null,
+          targetDirection,
+        }
+        await updateKpi.mutateAsync({ id: kpiId, data })
+      } else {
+        const data: CreateKpiRequest = {
+          name: name.trim(),
+          description: description.trim() || undefined,
+          formula: formula.trim(),
+          sources,
+          targetValue: targetValue ? parseFloat(targetValue) : undefined,
+          targetDirection,
+          targetPeriod,
+        }
+        await createKpi.mutateAsync(data)
+      }
       onClose()
     } catch (error) {
-      console.error('Failed to create KPI:', error)
+      console.error(`Failed to ${isEditMode ? 'update' : 'create'} KPI:`, error)
     }
   }
 
@@ -124,13 +185,29 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
     return true
   }
 
+  // Show loading while fetching KPI data in edit mode
+  if (isEditMode && (kpiLoading || !isInitialized)) {
+    return (
+      <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8">
+          <div className="flex items-center gap-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-violet-600"></div>
+            <span className="text-gray-600 dark:text-gray-300">Loading KPI...</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Create KPI</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              {isEditMode ? 'Edit KPI' : 'Create KPI'}
+            </h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600"
@@ -437,16 +514,16 @@ export function KpiWizard({ onClose }: KpiWizardProps) {
           ) : (
             <button
               onClick={handleCreate}
-              disabled={createKpi.isPending}
+              disabled={createKpi.isPending || updateKpi.isPending}
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
             >
-              {createKpi.isPending ? (
+              {(createKpi.isPending || updateKpi.isPending) ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                  Creating...
+                  {isEditMode ? 'Saving...' : 'Creating...'}
                 </>
               ) : (
-                'Create KPI'
+                isEditMode ? 'Save Changes' : 'Create KPI'
               )}
             </button>
           )}
