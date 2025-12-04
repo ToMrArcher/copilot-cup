@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Kpi } from '../../types/kpi'
 import { useDeleteKpi, useRecalculateKpi } from '../../hooks/useKpis'
 import { CreateShareModal } from '../sharing/CreateShareModal'
+import { AccessManagementDialog } from '../../components/AccessManagementDialog'
 
 interface KpiCardProps {
   kpi: Kpi
@@ -12,6 +13,12 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
   const deleteKpi = useDeleteKpi()
   const recalculate = useRecalculateKpi()
   const [showShareModal, setShowShareModal] = useState(false)
+  const [showAccessModal, setShowAccessModal] = useState(false)
+
+  const handleAccessManage = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setShowAccessModal(true)
+  }
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -72,12 +79,32 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="font-medium text-gray-900 dark:text-gray-100 text-lg">{kpi.name}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium text-gray-900 dark:text-gray-100 text-lg">{kpi.name}</h3>
+            {/* Access indicator */}
+            {!kpi.isOwner && (
+              <span className="px-1.5 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                Shared
+              </span>
+            )}
+          </div>
           {kpi.description && (
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{kpi.description}</p>
           )}
         </div>
         <div className="flex gap-2">
+          {/* Access Management - only for owner/admin */}
+          {kpi.canManage && kpi.owner && (
+            <button
+              onClick={handleAccessManage}
+              className="p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/30 rounded"
+              title="Manage access"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+              </svg>
+            </button>
+          )}
           <button
             onClick={handleShare}
             className="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded"
@@ -87,26 +114,32 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
             </svg>
           </button>
-          <button
-            onClick={handleRecalculate}
-            disabled={recalculate.isPending}
-            className="p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/30 rounded"
-            title="Recalculate"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-          </button>
-          <button
-            onClick={handleDelete}
-            disabled={deleteKpi.isPending}
-            className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
-            title="Delete"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
+          {/* Only show recalculate if user can edit */}
+          {kpi.canEdit && (
+            <button
+              onClick={handleRecalculate}
+              disabled={recalculate.isPending}
+              className="p-1.5 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/30 rounded"
+              title="Recalculate"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          )}
+          {/* Only show delete if user can manage */}
+          {kpi.canManage && (
+            <button
+              onClick={handleDelete}
+              disabled={deleteKpi.isPending}
+              className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
+              title="Delete"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 
@@ -187,6 +220,18 @@ export function KpiCard({ kpi, onClick }: KpiCardProps) {
           resourceId={kpi.id}
           resourceName={kpi.name}
           onClose={() => setShowShareModal(false)}
+        />
+      )}
+
+      {/* Access Management Modal */}
+      {showAccessModal && kpi.owner && (
+        <AccessManagementDialog
+          isOpen={showAccessModal}
+          resourceType="kpi"
+          resourceId={kpi.id}
+          resourceName={kpi.name}
+          owner={kpi.owner}
+          onClose={() => setShowAccessModal(false)}
         />
       )}
     </div>

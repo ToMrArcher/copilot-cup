@@ -7,6 +7,7 @@ import { useState, useCallback, useRef } from 'react'
 import { useDashboard, useDeleteWidget, useUpdateLayout, useKpiHistory } from '../../hooks/useDashboards'
 import { NumberWidget, StatWidget, GaugeWidget, ChartWidget } from './widgets'
 import { CreateShareModal } from '../sharing/CreateShareModal'
+import { AccessManagementDialog } from '../../components/AccessManagementDialog'
 import { DraggableGrid } from './DraggableGrid'
 import { AutoRefreshProvider } from '../../contexts/AutoRefreshContext'
 import { RefreshControls } from './RefreshControls'
@@ -32,6 +33,7 @@ function DashboardViewContent({ dashboardId, onBack, onAddWidget }: DashboardVie
   const deleteWidget = useDeleteWidget()
   const updateLayout = useUpdateLayout()
   const [showShareModal, setShowShareModal] = useState(false)
+  const [showAccessModal, setShowAccessModal] = useState(false)
   
   // Debounce timer for layout saves
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -99,7 +101,15 @@ function DashboardViewContent({ dashboardId, onBack, onAddWidget }: DashboardVie
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{dashboard.name}</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{dashboard.name}</h1>
+            {/* Access indicator - only show for non-owners who don't have full manage rights */}
+            {!dashboard.isOwner && !dashboard.canManage && (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Shared with you {dashboard.canEdit ? '(can edit)' : '(view only)'}
+              </p>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-3">
           {/* Refresh Controls */}
@@ -107,6 +117,21 @@ function DashboardViewContent({ dashboardId, onBack, onAddWidget }: DashboardVie
           
           <div className="w-px h-6 bg-gray-300 dark:bg-gray-600" />
           
+          {/* Manage Access - only for owner/admin */}
+          {dashboard.canManage && dashboard.owner && (
+            <button
+              onClick={() => setShowAccessModal(true)}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+              title="Manage access"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+              </svg>
+              Access
+            </button>
+          )}
+
+          {/* Public Share Link */}
           <button
             onClick={() => setShowShareModal(true)}
             className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -116,15 +141,19 @@ function DashboardViewContent({ dashboardId, onBack, onAddWidget }: DashboardVie
             </svg>
             Share
           </button>
-          <button
-            onClick={onAddWidget}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-violet-600 hover:bg-violet-700"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add Widget
-          </button>
+
+          {/* Add Widget - only for edit permission */}
+          {dashboard.canEdit && (
+            <button
+              onClick={onAddWidget}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-violet-600 hover:bg-violet-700"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Widget
+            </button>
+          )}
         </div>
       </div>
 
@@ -133,7 +162,7 @@ function DashboardViewContent({ dashboardId, onBack, onAddWidget }: DashboardVie
         <DraggableGrid
           widgets={dashboard.widgets}
           onLayoutChange={handleLayoutChange}
-          isReadOnly={false}
+          isReadOnly={!dashboard.canEdit}
         >
           {dashboard.widgets.map((widget) => (
             <div key={widget.id} data-grid={{ 
@@ -145,6 +174,7 @@ function DashboardViewContent({ dashboardId, onBack, onAddWidget }: DashboardVie
               <WidgetRenderer
                 widget={widget}
                 onDelete={() => handleDeleteWidget(widget.id)}
+                canEdit={dashboard.canEdit}
               />
             </div>
           ))}
@@ -155,18 +185,22 @@ function DashboardViewContent({ dashboardId, onBack, onAddWidget }: DashboardVie
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
           <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No widgets</h3>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Add widgets to visualize your KPIs.</p>
-          <div className="mt-6">
-            <button
-              onClick={onAddWidget}
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-violet-600 hover:bg-violet-700"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Add Widget
-            </button>
-          </div>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            {dashboard.canEdit ? 'Add widgets to visualize your KPIs.' : 'No widgets have been added to this dashboard yet.'}
+          </p>
+          {dashboard.canEdit && (
+            <div className="mt-6">
+              <button
+                onClick={onAddWidget}
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-violet-600 hover:bg-violet-700"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Add Widget
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -180,6 +214,18 @@ function DashboardViewContent({ dashboardId, onBack, onAddWidget }: DashboardVie
           onClose={() => setShowShareModal(false)}
         />
       )}
+
+      {/* Access Management Modal */}
+      {showAccessModal && dashboard.owner && (
+        <AccessManagementDialog
+          isOpen={showAccessModal}
+          resourceType="dashboard"
+          resourceId={dashboardId}
+          resourceName={dashboard.name}
+          owner={dashboard.owner}
+          onClose={() => setShowAccessModal(false)}
+        />
+      )}
     </div>
   )
 }
@@ -188,14 +234,18 @@ function DashboardViewContent({ dashboardId, onBack, onAddWidget }: DashboardVie
 interface WidgetRendererProps {
   widget: Widget
   onDelete: () => void
+  canEdit?: boolean
 }
 
-function WidgetRenderer({ widget, onDelete }: WidgetRendererProps) {
+function WidgetRenderer({ widget, onDelete, canEdit = true }: WidgetRendererProps) {
   const { type, kpi, kpiData, config } = widget
 
   const title = kpi?.name || 'Widget'
   const value = kpiData?.currentValue ?? null
   const targetValue = kpiData?.targetValue ?? kpi?.targetValue ?? null
+
+  // Only allow delete if user can edit
+  const handleDelete = canEdit ? onDelete : undefined
 
   // Render based on widget type
   const renderContent = () => {
@@ -207,7 +257,7 @@ function WidgetRenderer({ widget, onDelete }: WidgetRendererProps) {
             value={value}
             targetValue={targetValue}
             format={config?.format}
-            onDelete={onDelete}
+            onDelete={handleDelete}
           />
         )
       
@@ -215,7 +265,7 @@ function WidgetRenderer({ widget, onDelete }: WidgetRendererProps) {
         return (
           <StatWidgetWithHistory
             widget={widget}
-            onDelete={onDelete}
+            onDelete={handleDelete}
           />
         )
       
@@ -226,7 +276,7 @@ function WidgetRenderer({ widget, onDelete }: WidgetRendererProps) {
             value={value}
             targetValue={targetValue}
             format={config?.format}
-            onDelete={onDelete}
+            onDelete={handleDelete}
           />
         )
       
@@ -236,7 +286,7 @@ function WidgetRenderer({ widget, onDelete }: WidgetRendererProps) {
         return (
           <ChartWidgetWithHistory
             widget={widget}
-            onDelete={onDelete}
+            onDelete={handleDelete}
           />
         )
       
@@ -247,7 +297,7 @@ function WidgetRenderer({ widget, onDelete }: WidgetRendererProps) {
             value={value}
             targetValue={targetValue}
             format={config?.format}
-            onDelete={onDelete}
+            onDelete={handleDelete}
           />
         )
     }
@@ -272,7 +322,7 @@ function WidgetRenderer({ widget, onDelete }: WidgetRendererProps) {
 }
 
 // Stat Widget with History Data
-function StatWidgetWithHistory({ widget, onDelete }: { widget: Widget; onDelete: () => void }) {
+function StatWidgetWithHistory({ widget, onDelete }: { widget: Widget; onDelete?: () => void }) {
   const { data: history, isLoading } = useKpiHistory(
     widget.kpiId || '',
     widget.config?.period || '30d'
@@ -293,7 +343,7 @@ function StatWidgetWithHistory({ widget, onDelete }: { widget: Widget; onDelete:
 }
 
 // Chart Widget with History Data
-function ChartWidgetWithHistory({ widget, onDelete }: { widget: Widget; onDelete: () => void }) {
+function ChartWidgetWithHistory({ widget, onDelete }: { widget: Widget; onDelete?: () => void }) {
   const [period, setPeriod] = useState(widget.config?.period || '30d')
   const { data: history, isLoading, error } = useKpiHistory(
     widget.kpiId || '',

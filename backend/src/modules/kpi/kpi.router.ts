@@ -4,6 +4,11 @@ import { calculateKpi, updateKpiValue } from '../../services/kpi-calculator.serv
 import { validateFormula } from '../../services/formula.service'
 import { getKpiHistory } from '../../services/kpi-history.service'
 import { AggregationInterval } from '../../types/kpi-history.types'
+import { 
+  getAccessibleKpisFilter, 
+  canAccessKpi,
+} from '../../services/permission.service'
+import { getPermissionContext } from '../../middleware/permission.middleware'
 
 export const kpiRouter = Router()
 
@@ -122,12 +127,19 @@ kpiRouter.get('/:id/history', async (req: Request, res: Response) => {
 
 /**
  * GET /api/kpis
- * List all KPIs with calculated current values
+ * List all KPIs the user can access with calculated current values
  */
-kpiRouter.get('/', async (_req: Request, res: Response) => {
+kpiRouter.get('/', async (req: Request, res: Response) => {
   try {
+    const ctx = getPermissionContext(req)
+    const accessFilter = ctx ? getAccessibleKpisFilter(ctx) : {}
+
     const kpis = await prisma.kpi.findMany({
+      where: accessFilter,
       include: {
+        owner: {
+          select: { id: true, name: true, email: true },
+        },
         sources: {
           include: {
             dataField: {
@@ -141,6 +153,9 @@ kpiRouter.get('/', async (_req: Request, res: Response) => {
         },
         integration: {
           select: { id: true, name: true },
+        },
+        accessList: {
+          select: { userId: true, permission: true },
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -158,6 +173,10 @@ kpiRouter.get('/', async (_req: Request, res: Response) => {
           sources: kpi.sources,
         })
 
+        const isOwner = ctx ? kpi.ownerId === ctx.userId : false
+        const isAdmin = ctx?.userRole === 'ADMIN'
+        const hasEditAccess = kpi.accessList?.some(a => a.userId === ctx?.userId && a.permission === 'EDIT') || false
+
         return {
           ...kpi,
           currentValue: calculation.currentValue,
@@ -165,6 +184,10 @@ kpiRouter.get('/', async (_req: Request, res: Response) => {
           onTrack: calculation.onTrack,
           calculationError: calculation.error,
           calculatedAt: calculation.calculatedAt,
+          isOwner,
+          canEdit: isOwner || isAdmin || hasEditAccess,
+          canManage: isOwner || isAdmin,
+          canShare: isOwner || isAdmin || hasEditAccess,
         }
       })
     )
@@ -182,9 +205,23 @@ kpiRouter.get('/', async (_req: Request, res: Response) => {
  */
 kpiRouter.get('/:id', async (req: Request, res: Response) => {
   try {
+    const ctx = getPermissionContext(req)
+    
+    // Check view permission
+    if (ctx) {
+      const hasAccess = await canAccessKpi(ctx, req.params.id, 'VIEW')
+      if (!hasAccess) {
+        res.status(403).json({ error: 'Access denied' })
+        return
+      }
+    }
+
     const kpi = await prisma.kpi.findUnique({
       where: { id: req.params.id },
       include: {
+        owner: {
+          select: { id: true, name: true, email: true },
+        },
         sources: {
           include: {
             dataField: {
@@ -221,6 +258,16 @@ kpiRouter.get('/:id', async (req: Request, res: Response) => {
       sources: kpi.sources,
     })
 
+    // Determine permissions
+    let canEdit = false
+    let canManage = false
+    let canShare = false
+    if (ctx) {
+      canEdit = await canAccessKpi(ctx, req.params.id, 'EDIT')
+      canManage = await canAccessKpi(ctx, req.params.id, 'MANAGE')
+      canShare = await canAccessKpi(ctx, req.params.id, 'SHARE')
+    }
+
     res.json({
       ...kpi,
       currentValue: calculation.currentValue,
@@ -228,6 +275,10 @@ kpiRouter.get('/:id', async (req: Request, res: Response) => {
       onTrack: calculation.onTrack,
       calculationError: calculation.error,
       calculatedAt: calculation.calculatedAt,
+      isOwner: ctx ? kpi.ownerId === ctx.userId : false,
+      canEdit,
+      canManage,
+      canShare,
     })
   } catch (error) {
     console.error('Error fetching KPI:', error)
@@ -241,6 +292,8 @@ kpiRouter.get('/:id', async (req: Request, res: Response) => {
  */
 kpiRouter.post('/', async (req: Request, res: Response) => {
   try {
+    const ctx = getPermissionContext(req)
+
     const {
       name,
       description,
@@ -280,6 +333,12 @@ kpiRouter.post('/', async (req: Request, res: Response) => {
       return
     }
 
+    // Determine owner
+    let ownerId: string | undefined
+    if (ctx) {
+      ownerId = ctx.userId
+    }
+
     // Create KPI with sources
     const kpi = await prisma.kpi.create({
       data: {
@@ -287,6 +346,7 @@ kpiRouter.post('/', async (req: Request, res: Response) => {
         description,
         formula,
         integrationId,
+        ownerId,
         targetValue,
         targetDirection,
         targetPeriod,
@@ -340,6 +400,17 @@ kpiRouter.post('/', async (req: Request, res: Response) => {
  */
 kpiRouter.put('/:id', async (req: Request, res: Response) => {
   try {
+    const ctx = getPermissionContext(req)
+    
+    // Check edit permission
+    if (ctx) {
+      const hasAccess = await canAccessKpi(ctx, req.params.id, 'EDIT')
+      if (!hasAccess) {
+        res.status(403).json({ error: 'Access denied. You need edit permission.' })
+        return
+      }
+    }
+
     const { name, description, formula, targetValue, targetDirection, targetPeriod, sources } =
       req.body as {
         name?: string
@@ -442,6 +513,17 @@ kpiRouter.put('/:id', async (req: Request, res: Response) => {
  */
 kpiRouter.delete('/:id', async (req: Request, res: Response) => {
   try {
+    const ctx = getPermissionContext(req)
+    
+    // Check delete permission (owner or admin only)
+    if (ctx) {
+      const hasAccess = await canAccessKpi(ctx, req.params.id, 'DELETE')
+      if (!hasAccess) {
+        res.status(403).json({ error: 'Access denied. Only the owner can delete this KPI.' })
+        return
+      }
+    }
+
     const existing = await prisma.kpi.findUnique({
       where: { id: req.params.id },
     })
@@ -512,5 +594,262 @@ kpiRouter.post('/:id/recalculate', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error recalculating KPI:', error)
     res.status(500).json({ error: 'Failed to recalculate KPI' })
+  }
+})
+
+// ============ Access Control ============
+
+/**
+ * GET /api/kpis/:id/access
+ * List users with access to this KPI
+ */
+kpiRouter.get('/:id/access', async (req: Request, res: Response) => {
+  try {
+    const ctx = getPermissionContext(req)
+    
+    // Check manage permission
+    if (ctx) {
+      const hasAccess = await canAccessKpi(ctx, req.params.id, 'MANAGE')
+      if (!hasAccess) {
+        res.status(403).json({ error: 'Access denied. Only the owner can manage access.' })
+        return
+      }
+    }
+
+    const kpi = await prisma.kpi.findUnique({
+      where: { id: req.params.id },
+      include: {
+        owner: {
+          select: { id: true, name: true, email: true },
+        },
+        accessList: {
+          include: {
+            user: {
+              select: { id: true, name: true, email: true },
+            },
+          },
+          orderBy: { grantedAt: 'desc' },
+        },
+      },
+    })
+
+    if (!kpi) {
+      res.status(404).json({ error: 'KPI not found' })
+      return
+    }
+
+    res.json({
+      owner: kpi.owner,
+      accessList: kpi.accessList.map(a => ({
+        userId: a.user.id,
+        userName: a.user.name,
+        userEmail: a.user.email,
+        permission: a.permission,
+        grantedAt: a.grantedAt,
+      })),
+    })
+  } catch (error) {
+    console.error('Error fetching access list:', error)
+    res.status(500).json({ error: 'Failed to fetch access list' })
+  }
+})
+
+/**
+ * POST /api/kpis/:id/access
+ * Grant access to a user
+ */
+kpiRouter.post('/:id/access', async (req: Request, res: Response) => {
+  try {
+    const ctx = getPermissionContext(req)
+    
+    // Check share permission (owners, admins, and editors can share)
+    if (ctx) {
+      const hasAccess = await canAccessKpi(ctx, req.params.id, 'SHARE')
+      if (!hasAccess) {
+        res.status(403).json({ error: 'Access denied. You need edit access to share this KPI.' })
+        return
+      }
+    }
+
+    const { userId, email, permission } = req.body as {
+      userId?: string
+      email?: string
+      permission: 'VIEW' | 'EDIT'
+    }
+
+    if (!permission || !['VIEW', 'EDIT'].includes(permission)) {
+      res.status(400).json({ error: 'Permission must be VIEW or EDIT' })
+      return
+    }
+
+    // Find user by ID or email
+    let targetUserId = userId
+    if (!targetUserId && email) {
+      const user = await prisma.user.findUnique({ where: { email } })
+      if (!user) {
+        res.status(404).json({ error: 'User not found' })
+        return
+      }
+      targetUserId = user.id
+    }
+
+    if (!targetUserId) {
+      res.status(400).json({ error: 'userId or email is required' })
+      return
+    }
+
+    // Check if granting to self (owner)
+    const kpi = await prisma.kpi.findUnique({
+      where: { id: req.params.id },
+    })
+
+    if (kpi?.ownerId === targetUserId) {
+      res.status(400).json({ error: 'Cannot grant access to the owner' })
+      return
+    }
+
+    // Upsert access entry
+    const access = await prisma.kpiAccess.upsert({
+      where: {
+        kpiId_userId: {
+          kpiId: req.params.id,
+          userId: targetUserId,
+        },
+      },
+      update: {
+        permission,
+        grantedById: ctx?.userId,
+      },
+      create: {
+        kpiId: req.params.id,
+        userId: targetUserId,
+        permission,
+        grantedById: ctx?.userId,
+      },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+    })
+
+    res.status(201).json({
+      userId: access.user.id,
+      userName: access.user.name,
+      userEmail: access.user.email,
+      permission: access.permission,
+      grantedAt: access.grantedAt,
+    })
+  } catch (error) {
+    console.error('Error granting access:', error)
+    res.status(500).json({ error: 'Failed to grant access' })
+  }
+})
+
+/**
+ * PATCH /api/kpis/:id/access/:userId
+ * Update a user's permission level
+ */
+kpiRouter.patch('/:id/access/:userId', async (req: Request, res: Response) => {
+  try {
+    const ctx = getPermissionContext(req)
+    
+    // Check share permission (owners, admins, and editors can update access)
+    if (ctx) {
+      const hasAccess = await canAccessKpi(ctx, req.params.id, 'SHARE')
+      if (!hasAccess) {
+        res.status(403).json({ error: 'Access denied. You need edit access to update permissions.' })
+        return
+      }
+    }
+
+    const { permission } = req.body as { permission: 'VIEW' | 'EDIT' }
+
+    if (!permission || !['VIEW', 'EDIT'].includes(permission)) {
+      res.status(400).json({ error: 'Permission must be VIEW or EDIT' })
+      return
+    }
+
+    const access = await prisma.kpiAccess.update({
+      where: {
+        kpiId_userId: {
+          kpiId: req.params.id,
+          userId: req.params.userId,
+        },
+      },
+      data: { permission },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+    })
+
+    res.json({
+      userId: access.user.id,
+      userName: access.user.name,
+      userEmail: access.user.email,
+      permission: access.permission,
+      grantedAt: access.grantedAt,
+    })
+  } catch (error) {
+    console.error('Error updating access:', error)
+    res.status(500).json({ error: 'Failed to update access' })
+  }
+})
+
+/**
+ * DELETE /api/kpis/:id/access/:userId
+ * Revoke a user's access
+ */
+kpiRouter.delete('/:id/access/:userId', async (req: Request, res: Response) => {
+  try {
+    const ctx = getPermissionContext(req)
+    
+    // Check share permission (owners, admins, and editors can revoke access)
+    if (ctx) {
+      const hasAccess = await canAccessKpi(ctx, req.params.id, 'SHARE')
+      if (!hasAccess) {
+        res.status(403).json({ error: 'Access denied. You need edit access to revoke permissions.' })
+        return
+      }
+    }
+
+    // Get KPI to check ownership
+    const kpi = await prisma.kpi.findUnique({
+      where: { id: req.params.id },
+      select: { ownerId: true },
+    })
+
+    // Check if trying to remove owner's access (not allowed)
+    if (kpi?.ownerId === req.params.userId) {
+      res.status(403).json({ error: 'Cannot revoke owner access' })
+      return
+    }
+
+    // Check if target user is an admin (non-admins cannot revoke admin access)
+    const targetUser = await prisma.user.findUnique({
+      where: { id: req.params.userId },
+      select: { role: true },
+    })
+
+    if (targetUser?.role === 'ADMIN' && ctx?.userRole !== 'ADMIN') {
+      res.status(403).json({ error: 'Only admins can revoke admin access' })
+      return
+    }
+
+    await prisma.kpiAccess.delete({
+      where: {
+        kpiId_userId: {
+          kpiId: req.params.id,
+          userId: req.params.userId,
+        },
+      },
+    })
+
+    res.status(204).send()
+  } catch (error) {
+    console.error('Error revoking access:', error)
+    res.status(500).json({ error: 'Failed to revoke access' })
   }
 })

@@ -23,14 +23,22 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  dashboards Dashboard[]
-  shareLinks ShareLink[]
+  dashboards      Dashboard[]
+  ownedKpis       Kpi[]             @relation("KpiOwner")
+  shareLinks      ShareLink[]
+  dashboardAccess DashboardAccess[]
+  kpiAccess       KpiAccess[]
 }
 
 enum Role {
   ADMIN
   EDITOR
   VIEWER
+}
+
+enum AccessPermission {
+  VIEW
+  EDIT
 }
 
 // ==========================================
@@ -92,6 +100,8 @@ model Kpi {
   formula         String      // Formula expression
   integrationId   String?
   integration     Integration? @relation(fields: [integrationId], references: [id])
+  ownerId         String?
+  owner           User?       @relation("KpiOwner", fields: [ownerId], references: [id])
   currentValue    Float?
   targetValue     Float?
   targetDirection String?     // increase, decrease
@@ -102,6 +112,7 @@ model Kpi {
   sources    KpiSource[]
   widgets    Widget[]
   shareLinks ShareLink[]
+  accessList KpiAccess[]
 }
 
 model KpiSource {
@@ -129,6 +140,7 @@ model Dashboard {
 
   widgets    Widget[]
   shareLinks ShareLink[]
+  accessList DashboardAccess[]
 }
 
 model Widget {
@@ -167,4 +179,36 @@ model ShareLink {
   createdAt      DateTime   @default(now())
 
   @@index([createdById])
+}
+
+// ==========================================
+// Access Control
+// ==========================================
+
+model DashboardAccess {
+  id          String           @id @default(cuid())
+  dashboardId String
+  dashboard   Dashboard        @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission  AccessPermission @default(VIEW)
+  grantedAt   DateTime         @default(now())
+  grantedById String?
+
+  @@unique([dashboardId, userId])
+  @@index([userId])
+}
+
+model KpiAccess {
+  id          String           @id @default(cuid())
+  kpiId       String
+  kpi         Kpi              @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission  AccessPermission @default(VIEW)
+  grantedAt   DateTime         @default(now())
+  grantedById String?
+
+  @@unique([kpiId, userId])
+  @@index([userId])
 }

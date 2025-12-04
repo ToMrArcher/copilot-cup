@@ -4,6 +4,33 @@
 
 export type WidgetType = 'number' | 'stat' | 'gauge' | 'line' | 'bar' | 'area'
 
+export type AccessPermission = 'VIEW' | 'EDIT'
+
+export interface UserSummary {
+  id: string
+  name: string | null
+  email: string
+}
+
+export interface AccessEntry {
+  userId: string
+  userName: string | null
+  userEmail: string
+  permission: AccessPermission
+  grantedAt: string
+}
+
+export interface AccessListResponse {
+  owner: UserSummary
+  accessList: AccessEntry[]
+}
+
+export interface GrantAccessRequest {
+  userId?: string
+  email?: string
+  permission: AccessPermission
+}
+
 export interface WidgetPosition {
   x: number
   y: number
@@ -50,16 +77,23 @@ export interface Dashboard {
   id: string
   name: string
   ownerId: string
+  owner?: UserSummary
   layout?: Record<string, unknown> | null
   createdAt: string
   updatedAt: string
   widgets: Widget[]
+  // Access control flags
+  isOwner?: boolean
+  canEdit?: boolean
+  canManage?: boolean
+  canShare?: boolean
 }
 
 export interface DashboardListItem {
   id: string
   name: string
   ownerId: string
+  owner?: UserSummary
   layout?: Record<string, unknown> | null
   createdAt: string
   updatedAt: string
@@ -67,6 +101,11 @@ export interface DashboardListItem {
   _count: {
     widgets: number
   }
+  // Access control flags
+  isOwner?: boolean
+  canEdit?: boolean
+  canManage?: boolean
+  canShare?: boolean
 }
 
 // API Request/Response types

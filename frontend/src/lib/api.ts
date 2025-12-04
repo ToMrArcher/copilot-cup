@@ -19,6 +19,10 @@ import type {
   UpdateWidgetRequest,
   UpdateLayoutRequest,
   KpiHistoryResponse,
+  AccessListResponse,
+  AccessEntry,
+  GrantAccessRequest,
+  AccessPermission,
 } from '../types/dashboard'
 import type {
   LoginRequest,
@@ -329,6 +333,32 @@ export const kpisApi = {
     const query = params.toString()
     return fetchApi<KpiHistoryResponse>(`/api/kpis/${id}/history${query ? `?${query}` : ''}`)
   },
+
+  // ============ Access Control ============
+
+  // Get access list for a KPI
+  getAccess: (kpiId: string) =>
+    fetchApi<AccessListResponse>(`/api/kpis/${kpiId}/access`),
+
+  // Grant access to a user
+  grantAccess: (kpiId: string, data: GrantAccessRequest) =>
+    fetchApi<AccessEntry>(`/api/kpis/${kpiId}/access`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Update a user's permission level
+  updateAccess: (kpiId: string, userId: string, permission: AccessPermission) =>
+    fetchApi<AccessEntry>(`/api/kpis/${kpiId}/access/${userId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ permission }),
+    }),
+
+  // Revoke a user's access
+  revokeAccess: (kpiId: string, userId: string) =>
+    fetchApi<void>(`/api/kpis/${kpiId}/access/${userId}`, {
+      method: 'DELETE',
+    }),
 }
 
 // ============ Dashboards API ============
@@ -384,6 +414,32 @@ export const dashboardsApi = {
   // Delete widget
   deleteWidget: (dashboardId: string, widgetId: string) =>
     fetchApi<void>(`/api/dashboards/${dashboardId}/widgets/${widgetId}`, {
+      method: 'DELETE',
+    }),
+
+  // ============ Access Control ============
+
+  // Get access list for a dashboard
+  getAccess: (dashboardId: string) =>
+    fetchApi<AccessListResponse>(`/api/dashboards/${dashboardId}/access`),
+
+  // Grant access to a user
+  grantAccess: (dashboardId: string, data: GrantAccessRequest) =>
+    fetchApi<AccessEntry>(`/api/dashboards/${dashboardId}/access`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Update a user's permission level
+  updateAccess: (dashboardId: string, userId: string, permission: AccessPermission) =>
+    fetchApi<AccessEntry>(`/api/dashboards/${dashboardId}/access/${userId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ permission }),
+    }),
+
+  // Revoke a user's access
+  revokeAccess: (dashboardId: string, userId: string) =>
+    fetchApi<void>(`/api/dashboards/${dashboardId}/access/${userId}`, {
       method: 'DELETE',
     }),
 }

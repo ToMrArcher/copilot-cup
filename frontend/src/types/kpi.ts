@@ -1,11 +1,18 @@
 // KPI Types
 
+import type { AccessPermission, UserSummary, AccessEntry, AccessListResponse, GrantAccessRequest } from './dashboard'
+
+// Re-export access types for convenience
+export type { AccessPermission, UserSummary, AccessEntry, AccessListResponse, GrantAccessRequest }
+
 export interface Kpi {
   id: string
   name: string
   description?: string | null
   formula: string
   integrationId?: string | null
+  ownerId?: string | null
+  owner?: UserSummary | null
   currentValue?: number | null
   targetValue?: number | null
   targetDirection?: 'increase' | 'decrease' | null
@@ -21,6 +28,11 @@ export interface Kpi {
     id: string
     name: string
   } | null
+  // Access control flags
+  isOwner?: boolean
+  canEdit?: boolean
+  canManage?: boolean
+  canShare?: boolean
 }
 
 export interface KpiSource {

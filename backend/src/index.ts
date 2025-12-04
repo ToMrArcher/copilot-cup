@@ -9,6 +9,7 @@ import { dashboardRouter } from './modules/dashboard/dashboard.router'
 import { authRouter } from './modules/auth/auth.router'
 import { sharingRouter } from './modules/sharing/sharing.router'
 import { shareRouter } from './modules/sharing/share.router'
+import { optionalAuth } from './middleware/auth.middleware'
 
 // Load environment variables
 dotenv.config()
@@ -27,10 +28,10 @@ app.use(cookieParser())
 // Routes
 app.use('/health', healthRouter)
 app.use('/api/auth', authRouter)
-app.use('/api/integrations', integrationRouter)
-app.use('/api/kpis', kpiRouter)
-app.use('/api/dashboards', dashboardRouter)
-app.use('/api/sharing', sharingRouter)
+app.use('/api/integrations', optionalAuth, integrationRouter)
+app.use('/api/kpis', optionalAuth, kpiRouter)
+app.use('/api/dashboards', optionalAuth, dashboardRouter)
+app.use('/api/sharing', optionalAuth, sharingRouter)
 app.use('/api/share', shareRouter)  // Public route for accessing shared resources
 
 // Start server

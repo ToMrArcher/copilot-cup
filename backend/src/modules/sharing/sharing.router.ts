@@ -7,6 +7,7 @@ import {
   getShareUrl,
   type ExpirationPreset,
 } from '../../services/sharing.service'
+import { canAccessDashboard, canAccessKpi } from '../../services/permission.service'
 
 export const sharingRouter = Router()
 
@@ -38,12 +39,14 @@ sharingRouter.post('/', requireRole('EDITOR'), async (req: Request, res: Respons
       return
     }
 
-    // Verify resource exists and user has access
+    // Verify resource exists and user has SHARE access
     let resourceName: string
+    const ctx = { userId: req.user!.id, userRole: req.user!.role }
+
     if (resourceType === 'dashboard') {
       const dashboard = await prisma.dashboard.findUnique({
         where: { id: resourceId },
-        select: { id: true, name: true, ownerId: true },
+        select: { id: true, name: true },
       })
 
       if (!dashboard) {
@@ -51,9 +54,10 @@ sharingRouter.post('/', requireRole('EDITOR'), async (req: Request, res: Respons
         return
       }
 
-      // Check ownership (or admin)
-      if (dashboard.ownerId !== req.user!.id && req.user!.role !== 'ADMIN') {
-        res.status(403).json({ error: 'You do not have permission to share this dashboard' })
+      // Check SHARE permission (owners, admins, and editors)
+      const canShare = await canAccessDashboard(ctx, resourceId, 'SHARE')
+      if (!canShare) {
+        res.status(403).json({ error: 'You need edit access to share this dashboard' })
         return
       }
 
@@ -66,6 +70,13 @@ sharingRouter.post('/', requireRole('EDITOR'), async (req: Request, res: Respons
 
       if (!kpi) {
         res.status(404).json({ error: 'KPI not found' })
+        return
+      }
+
+      // Check SHARE permission (owners, admins, and editors)
+      const canShare = await canAccessKpi(ctx, resourceId, 'SHARE')
+      if (!canShare) {
+        res.status(403).json({ error: 'You need edit access to share this KPI' })
         return
       }
 
