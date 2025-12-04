@@ -1,4 +1,4 @@
-import type { Integration, DataField, IntegrationType, FieldSchema } from '../types/integration'
+import type { Integration, DataField, IntegrationType, FieldSchema, IntegrationConfig } from '../types/integration'
 import type {
   Kpi,
   KpiListResponse,
@@ -188,9 +188,16 @@ export const integrationsApi = {
       `/api/integrations/${id}/preview`
     ),
 
-  // Discover fields from API
+  // Discover fields from saved integration
   discoverFields: (id: string) =>
     fetchApi<FieldSchema[]>(`/api/integrations/${id}/discover-fields`),
+
+  // Discover fields from config (without saving integration first)
+  discoverFieldsFromConfig: (type: IntegrationType, config: IntegrationConfig) =>
+    fetchApi<FieldSchema[]>(`/api/integrations/discover-fields`, {
+      method: 'POST',
+      body: JSON.stringify({ type, config }),
+    }),
 
   // Get data values for an integration (latest values for each field)
   getData: (id: string) =>

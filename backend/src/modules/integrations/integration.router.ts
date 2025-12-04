@@ -510,6 +510,64 @@ integrationRouter.get('/:id/preview', async (req: Request, res: Response) => {
 })
 
 /**
+ * POST /api/integrations/discover-fields
+ * Discover available fields from a config without saving the integration first.
+ * This proxies the request through the backend to avoid CORS issues.
+ */
+integrationRouter.post('/discover-fields', async (req: Request, res: Response) => {
+  try {
+    const { type, config } = req.body as {
+      type: IntegrationType
+      config: IntegrationConfig
+    }
+
+    if (!type || !config) {
+      res.status(400).json({ error: 'Type and config are required' })
+      return
+    }
+
+    if (!AdapterRegistry.has(type)) {
+      res.status(400).json({ error: `Invalid integration type: ${type}` })
+      return
+    }
+
+    const adapter = AdapterRegistry.get(type)
+    const fields = await adapter.discoverFields(config)
+
+    res.json(fields)
+  } catch (error) {
+    console.error('Error discovering fields:', error)
+    res.status(500).json({ error: 'Failed to discover fields' })
+  }
+})
+
+/**
+ * GET /api/integrations/:id/discover-fields
+ * Discover available fields from the data source with sample values
+ */
+integrationRouter.get('/:id/discover-fields', async (req: Request, res: Response) => {
+  try {
+    const integration = await prisma.integration.findUnique({
+      where: { id: req.params.id },
+    })
+
+    if (!integration) {
+      res.status(404).json({ error: 'Integration not found' })
+      return
+    }
+
+    const adapter = AdapterRegistry.get(integration.type as IntegrationType)
+    const config = decryptJson<IntegrationConfig>(integration.config as string)
+    const fields = await adapter.discoverFields(config)
+
+    res.json(fields)
+  } catch (error) {
+    console.error('Error discovering fields:', error)
+    res.status(500).json({ error: 'Failed to discover fields' })
+  }
+})
+
+/**
  * GET /api/integrations/:id/fields
  * Discover available fields from the data source
  */

@@ -116,6 +116,11 @@ export class ApiAdapter implements IntegrationAdapter {
 
     const requestHeaders: Record<string, string> = { ...headers }
 
+    // Add User-Agent header (required by some APIs like met.no)
+    if (!requestHeaders['User-Agent']) {
+      requestHeaders['User-Agent'] = 'KPI-Dashboard/1.0'
+    }
+
     // Apply authentication
     switch (authType) {
       case 'apiKey':

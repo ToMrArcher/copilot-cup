@@ -2,8 +2,10 @@
  * Dashboard React Query Hooks
  */
 
+import { useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { dashboardsApi, kpisApi } from '../lib/api'
+import { useAutoRefreshOptional } from '../contexts/AutoRefreshContext'
 import type {
   CreateDashboardRequest,
   UpdateDashboardRequest,
@@ -43,6 +45,16 @@ export function useDashboards() {
 
 // Get single dashboard with widgets
 export function useDashboard(id: string) {
+  const queryClient = useQueryClient()
+  const { refreshKey } = useAutoRefreshOptional()
+
+  // Refetch when refreshKey changes
+  useEffect(() => {
+    if (refreshKey > 0 && id) {
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.detail(id) })
+    }
+  }, [refreshKey, id, queryClient])
+
   return useQuery({
     queryKey: dashboardKeys.detail(id),
     queryFn: () => dashboardsApi.getById(id),
@@ -153,6 +165,16 @@ export function useDeleteWidget() {
 
 // Get KPI history for charts
 export function useKpiHistory(kpiId: string, period?: string, interval?: string) {
+  const queryClient = useQueryClient()
+  const { refreshKey } = useAutoRefreshOptional()
+
+  // Refetch when refreshKey changes
+  useEffect(() => {
+    if (refreshKey > 0 && kpiId) {
+      queryClient.invalidateQueries({ queryKey: kpiHistoryKeys.history(kpiId, period, interval) })
+    }
+  }, [refreshKey, kpiId, period, interval, queryClient])
+
   return useQuery({
     queryKey: kpiHistoryKeys.history(kpiId, period, interval),
     queryFn: () => kpisApi.getHistory(kpiId, period, interval),

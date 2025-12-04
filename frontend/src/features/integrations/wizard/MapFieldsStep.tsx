@@ -1,5 +1,73 @@
 import type { DataField, FieldSchema } from '../../../types/integration'
+import { getFieldType } from '../../../types/integration'
 import { useState } from 'react'
+
+/**
+ * Format sample value for display based on data type
+ * Returns { display: string, full: string, isTruncated: boolean }
+ */
+function formatSampleValue(sample: unknown, type: string): { display: string; full: string; isTruncated: boolean } {
+  const MAX_LENGTH = 50
+
+  if (sample === null || sample === undefined) {
+    return { display: '—', full: 'No sample data', isTruncated: false }
+  }
+
+  let formatted: string
+
+  switch (type.toLowerCase()) {
+    case 'number':
+    case 'integer':
+      formatted = typeof sample === 'number' ? sample.toLocaleString() : String(sample)
+      break
+    case 'boolean':
+      formatted = sample ? 'true' : 'false'
+      break
+    case 'date':
+      try {
+        formatted = new Date(sample as string).toLocaleDateString()
+      } catch {
+        formatted = String(sample)
+      }
+      break
+    case 'object':
+      try {
+        const json = JSON.stringify(sample)
+        const keys = Object.keys(sample as object)
+        formatted = `{ ${keys.slice(0, 2).join(', ')}${keys.length > 2 ? ', ...' : ''} }`
+        return {
+          display: formatted.length > MAX_LENGTH ? formatted.slice(0, MAX_LENGTH) + '...' : formatted,
+          full: json,
+          isTruncated: true,
+        }
+      } catch {
+        formatted = '[object]'
+      }
+      break
+    case 'array':
+      try {
+        const arr = sample as unknown[]
+        formatted = `[${arr.length} items]`
+        return {
+          display: formatted,
+          full: JSON.stringify(sample),
+          isTruncated: true,
+        }
+      } catch {
+        formatted = '[array]'
+      }
+      break
+    default:
+      formatted = String(sample)
+  }
+
+  const isTruncated = formatted.length > MAX_LENGTH
+  return {
+    display: isTruncated ? formatted.slice(0, MAX_LENGTH) + '...' : formatted,
+    full: formatted,
+    isTruncated,
+  }
+}
 
 interface MapFieldsStepProps {
   discoveredFields: FieldSchema[]
@@ -24,16 +92,18 @@ export function MapFieldsStep({
   })
 
   const toggleField = (field: FieldSchema) => {
-    const existing = selectedFields.find(f => f.sourceField === field.name)
+    // Use path for data extraction (e.g., "rates.USD"), fall back to name
+    const fieldPath = field.path || field.name
+    const existing = selectedFields.find(f => f.sourceField === fieldPath)
     if (existing) {
-      onFieldsChange(selectedFields.filter(f => f.sourceField !== field.name))
+      onFieldsChange(selectedFields.filter(f => f.sourceField !== fieldPath))
     } else {
       onFieldsChange([
         ...selectedFields,
         {
-          sourceField: field.name,
-          targetField: field.name,
-          fieldType: mapSchemaType(field.type),
+          sourceField: fieldPath,  // Use path for data extraction
+          targetField: field.name, // Use name for display
+          fieldType: mapSchemaType(getFieldType(field)),
         },
       ])
     }
@@ -94,29 +164,48 @@ export function MapFieldsStep({
       {/* Discovered Fields */}
       {discoveredFields.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Discovered Fields
           </h3>
-          <div className="space-y-2 max-h-64 overflow-y-auto border rounded-md p-3 bg-gray-50">
+          <div className="space-y-2 max-h-80 overflow-y-auto border dark:border-gray-600 rounded-md p-3 bg-gray-50 dark:bg-gray-800">
             {discoveredFields.map(field => {
-              const isSelected = selectedFields.some(f => f.sourceField === field.name)
+              const fieldPath = field.path || field.name
+              const isSelected = selectedFields.some(f => f.sourceField === fieldPath)
+              const fieldType = getFieldType(field)
+              const sampleInfo = formatSampleValue(field.sample, fieldType)
               return (
                 <label
-                  key={field.name}
-                  className={`flex items-center p-2 rounded cursor-pointer transition-colors ${
-                    isSelected ? 'bg-violet-100' : 'hover:bg-gray-100'
+                  key={fieldPath}
+                  className={`block p-3 rounded cursor-pointer transition-colors ${
+                    isSelected 
+                      ? 'bg-violet-100 dark:bg-violet-900/30' 
+                      : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={() => toggleField(field)}
-                    className="h-4 w-4 text-violet-600 rounded border-gray-300"
-                  />
-                  <span className="ml-3 flex-1">
-                    <span className="font-medium text-gray-900">{field.name}</span>
-                    <span className="ml-2 text-xs text-gray-500">({field.type})</span>
-                  </span>
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleField(field)}
+                      className="h-4 w-4 mt-0.5 text-violet-600 rounded border-gray-300 dark:border-gray-500"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{field.name}</span>
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300">
+                          {fieldType}
+                        </span>
+                      </div>
+                      <div 
+                        className="mt-1 text-sm text-gray-500 dark:text-gray-400 font-mono truncate"
+                        title={sampleInfo.isTruncated ? sampleInfo.full : undefined}
+                      >
+                        <span className="text-gray-400 dark:text-gray-500">Example: </span>
+                        <span className={sampleInfo.display === '—' ? 'italic' : ''}>                          {sampleInfo.display}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </label>
               )
             })}

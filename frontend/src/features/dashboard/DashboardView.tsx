@@ -8,6 +8,8 @@ import { useDashboard, useDeleteWidget, useUpdateLayout, useKpiHistory } from '.
 import { NumberWidget, StatWidget, GaugeWidget, ChartWidget } from './widgets'
 import { CreateShareModal } from '../sharing/CreateShareModal'
 import { DraggableGrid } from './DraggableGrid'
+import { AutoRefreshProvider } from '../../contexts/AutoRefreshContext'
+import { RefreshControls } from './RefreshControls'
 import type { Widget, WidgetType } from '../../types/dashboard'
 import './dashboard.css'
 
@@ -18,6 +20,14 @@ interface DashboardViewProps {
 }
 
 export function DashboardView({ dashboardId, onBack, onAddWidget }: DashboardViewProps) {
+  return (
+    <AutoRefreshProvider dashboardId={dashboardId}>
+      <DashboardViewContent dashboardId={dashboardId} onBack={onBack} onAddWidget={onAddWidget} />
+    </AutoRefreshProvider>
+  )
+}
+
+function DashboardViewContent({ dashboardId, onBack, onAddWidget }: DashboardViewProps) {
   const { data: dashboard, isLoading, error } = useDashboard(dashboardId)
   const deleteWidget = useDeleteWidget()
   const updateLayout = useUpdateLayout()
@@ -92,6 +102,11 @@ export function DashboardView({ dashboardId, onBack, onAddWidget }: DashboardVie
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{dashboard.name}</h1>
         </div>
         <div className="flex items-center gap-3">
+          {/* Refresh Controls */}
+          <RefreshControls />
+          
+          <div className="w-px h-6 bg-gray-300 dark:bg-gray-600" />
+          
           <button
             onClick={() => setShowShareModal(true)}
             className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -279,11 +294,15 @@ function StatWidgetWithHistory({ widget, onDelete }: { widget: Widget; onDelete:
 
 // Chart Widget with History Data
 function ChartWidgetWithHistory({ widget, onDelete }: { widget: Widget; onDelete: () => void }) {
-  const period = widget.config?.period || '30d'
+  const [period, setPeriod] = useState(widget.config?.period || '30d')
   const { data: history, isLoading, error } = useKpiHistory(
     widget.kpiId || '',
     period
   )
+
+  const handlePeriodChange = (newPeriod: string) => {
+    setPeriod(newPeriod)
+  }
 
   return (
     <ChartWidget
@@ -295,6 +314,7 @@ function ChartWidgetWithHistory({ widget, onDelete }: { widget: Widget; onDelete
       showTarget={widget.config?.showTarget}
       targetValue={widget.kpiData?.targetValue}
       defaultPeriod={period}
+      onPeriodChange={handlePeriodChange}
       isLoading={isLoading}
       error={error?.message}
       onDelete={onDelete}

@@ -60,34 +60,12 @@ export function IntegrationWizard() {
     
     setIsDiscovering(true)
     try {
-      // Fetch data from the configured URL to discover fields
-      const response = await fetch(data.state.config.url, {
-        method: data.state.config.method || 'GET',
-        headers: data.state.config.authType === 'bearer' && data.state.config.authValue
-          ? { 'Authorization': `Bearer ${data.state.config.authValue}` }
-          : {},
-      })
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-      }
-      
-      const json = await response.json()
-      
-      // Extract fields from the response (handle both array and object with data property)
-      const sampleData = Array.isArray(json) ? json[0] : (json.data?.[0] || json)
-      
-      if (sampleData && typeof sampleData === 'object') {
-        const discoveredFields: FieldSchema[] = Object.entries(sampleData).map(([key, value]) => ({
-          name: key,
-          type: typeof value === 'number' ? 'number' 
-              : typeof value === 'boolean' ? 'boolean'
-              : value instanceof Date || (typeof value === 'string' && !isNaN(Date.parse(value)) && value.includes('-')) ? 'date'
-              : 'string',
-          required: false,
-        }))
-        setData(prev => ({ ...prev, discoveredFields }))
-      }
+      // Use backend to discover fields (avoids CORS issues with external APIs)
+      const fields = await integrationsApi.discoverFieldsFromConfig(
+        data.state.type,
+        data.state.config
+      )
+      setData(prev => ({ ...prev, discoveredFields: fields }))
     } catch (error) {
       console.error('Failed to discover fields:', error)
       alert('Failed to discover fields: ' + (error instanceof Error ? error.message : 'Unknown error'))

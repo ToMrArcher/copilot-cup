@@ -41,10 +41,16 @@ export interface IntegrationConfig {
 
 export interface FieldSchema {
   name: string
-  type: string
+  type?: string
+  dataType?: string // Backend returns dataType
   required?: boolean
   path?: string
   sample?: unknown
+}
+
+// Helper to get field type from FieldSchema (handles both type and dataType)
+export function getFieldType(field: FieldSchema): string {
+  return field.type || field.dataType || 'string'
 }
 
 export interface Integration {

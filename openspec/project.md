@@ -210,3 +210,7 @@ Rate-limit-håndtering: Unngå overdrevent mange kall til hvert API.
 
 ### Development Tools
 - Context7 MCP - AI documentation retrieval (configured in `.vscode/mcp.json`)
+
+###
+- Missing so far:
+- OAuth for API integration
