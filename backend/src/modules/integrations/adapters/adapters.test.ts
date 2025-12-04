@@ -245,4 +245,26 @@ describe('GraphqlAdapter', () => {
     expect(normalizedData[0].id).toBe(21878)
     expect(normalizedData[1].id).toBe(21970)
   })
+
+  it('should discover deeply nested fields like tickets.price.price', async () => {
+    // Test discoverFieldsDeep with the exact structure from user
+    const mockData = {
+      id: 21878,
+      tickets: [
+        { price: [{ price: '2100.00' }] }
+      ]
+    }
+
+    const fields = (adapter as any).discoverFieldsDeep(mockData, '', 0)
+    
+    // Should find: id, tickets.price.price
+    const fieldPaths = fields.map((f: any) => f.path)
+    expect(fieldPaths).toContain('id')
+    expect(fieldPaths).toContain('tickets.price.price')
+    
+    // Check the price field details
+    const priceField = fields.find((f: any) => f.path === 'tickets.price.price')
+    expect(priceField).toBeDefined()
+    expect(priceField.sample).toBe('2100.00')
+  })
 })

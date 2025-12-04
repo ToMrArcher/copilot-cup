@@ -117,21 +117,126 @@ export class GraphqlAdapter implements IntegrationAdapter {
 
   async discoverFields(config: IntegrationConfig): Promise<FieldSchema[]> {
     try {
+      console.log('[GraphQL] discoverFields called with config:', { 
+        url: config.url, 
+        query: config.query?.substring(0, 100),
+        hasVariables: !!config.variables 
+      })
+      
       const result = await this.fetchData(config, undefined, 5)
 
+      console.log('[GraphQL] fetchData result:', { 
+        success: result.success, 
+        dataLength: result.data.length,
+        error: result.error,
+        firstRow: result.data[0] ? JSON.stringify(result.data[0]).substring(0, 200) : 'none'
+      })
+
       if (!result.success || result.data.length === 0) {
+        console.log('[GraphQL] No data to discover fields from')
         return []
       }
 
-      // Analyze first row to discover fields
-      return this.extractFieldsFromObject(result.data[0], '')
+      // Analyze first row to discover fields, with deep array traversal
+      const fields = this.discoverFieldsDeep(result.data[0], '')
+      
+      console.log('[GraphQL] Discovered fields:', fields.map(f => ({ path: f.path, type: f.dataType })))
+      
+      // Remove duplicates by path
+      const uniqueFields = new Map<string, FieldSchema>()
+      for (const field of fields) {
+        if (!uniqueFields.has(field.path)) {
+          uniqueFields.set(field.path, field)
+        }
+      }
+      
+      return Array.from(uniqueFields.values())
     } catch {
       return []
     }
   }
 
+  /**
+   * Recursively discover all fields including those nested inside arrays
+   */
+  private discoverFieldsDeep(obj: unknown, prefix: string, depth: number = 0): FieldSchema[] {
+    if (depth > 10 || obj === null || obj === undefined) {
+      return []
+    }
+
+    const fields: FieldSchema[] = []
+
+    if (Array.isArray(obj)) {
+      // For arrays, look at the first element to discover structure
+      if (obj.length > 0) {
+        const arrayPath = prefix ? `${prefix}[]` : '[]'
+        
+        // If array contains primitives, add the array itself as a field
+        if (typeof obj[0] === 'number' || typeof obj[0] === 'string') {
+          fields.push({
+            name: prefix.split('.').pop() || 'values',
+            path: prefix,
+            dataType: 'array',
+            sample: obj.slice(0, 3),
+          })
+        } else if (typeof obj[0] === 'object') {
+          // Recurse into the first element to discover nested fields
+          fields.push(...this.discoverFieldsDeep(obj[0], arrayPath, depth + 1))
+        }
+      }
+    } else if (typeof obj === 'object') {
+      const record = obj as Record<string, unknown>
+      
+      for (const [key, value] of Object.entries(record)) {
+        const path = prefix ? `${prefix}.${key}` : key
+        const cleanPath = path.replace(/\[\]\./g, '.').replace(/^\[\]\./, '')
+        
+        if (value === null || value === undefined) {
+          fields.push({
+            name: key,
+            path: cleanPath,
+            dataType: 'string',
+            sample: null,
+          })
+        } else if (Array.isArray(value)) {
+          // Add the array field and also discover nested fields
+          if (value.length > 0) {
+            if (typeof value[0] === 'object') {
+              // Recurse into array of objects
+              fields.push(...this.discoverFieldsDeep(value, path, depth + 1))
+            } else {
+              // Array of primitives
+              fields.push({
+                name: key,
+                path: cleanPath,
+                dataType: 'array',
+                sample: value.slice(0, 3),
+              })
+            }
+          }
+        } else if (typeof value === 'object') {
+          // Recurse into nested object
+          fields.push(...this.discoverFieldsDeep(value, path, depth + 1))
+        } else {
+          // Primitive value
+          fields.push({
+            name: key,
+            path: cleanPath,
+            dataType: this.inferDataType(value),
+            sample: value,
+          })
+        }
+      }
+    }
+
+    return fields
+  }
+
   private async executeQuery(config: IntegrationConfig): Promise<Response> {
-    const { url, headers = {}, authType, apiKey, authHeader, username, password, query, variables, operationName } = config
+    const { url, headers = {}, authType, apiKey, authValue, authHeader, username, password, query, variables, operationName } = config
+    
+    // Support both apiKey and authValue (frontend uses authValue)
+    const token = apiKey || authValue
 
     if (!url) {
       throw new Error('GraphQL endpoint URL is required')
@@ -151,9 +256,21 @@ export class GraphqlAdapter implements IntegrationAdapter {
         .replace('127.0.0.1:5000', 'dummy-server:5050')
     }
 
+    // Parse headers if it's a string (from frontend)
+    let parsedHeaders: Record<string, string> = {}
+    if (typeof headers === 'string') {
+      try {
+        parsedHeaders = JSON.parse(headers)
+      } catch {
+        // Ignore parse errors
+      }
+    } else if (headers && typeof headers === 'object') {
+      parsedHeaders = headers as Record<string, string>
+    }
+
     const requestHeaders: Record<string, string> = { 
       'Content-Type': 'application/json',
-      ...headers 
+      ...parsedHeaders 
     }
 
     // Add User-Agent header
@@ -164,13 +281,13 @@ export class GraphqlAdapter implements IntegrationAdapter {
     // Apply authentication
     switch (authType) {
       case 'apiKey':
-        if (apiKey) {
-          requestHeaders[authHeader || 'X-API-Key'] = apiKey
+        if (token) {
+          requestHeaders[authHeader || 'X-API-Key'] = token
         }
         break
       case 'bearer':
-        if (apiKey) {
-          requestHeaders['Authorization'] = `Bearer ${apiKey}`
+        if (token) {
+          requestHeaders['Authorization'] = `Bearer ${token}`
         }
         break
       case 'basic':

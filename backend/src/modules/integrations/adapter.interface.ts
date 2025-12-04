@@ -39,11 +39,12 @@ export interface IntegrationConfig {
   // API-specific
   url?: string
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
-  headers?: Record<string, string>
+  headers?: Record<string, string> | string  // Can be object or JSON string from frontend
   body?: string
   apiKey?: string
   authType?: 'none' | 'apiKey' | 'bearer' | 'basic'
   authHeader?: string
+  authValue?: string  // Frontend uses this for auth tokens
   username?: string
   password?: string
   
