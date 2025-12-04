@@ -14,11 +14,18 @@ import {
  */
 
 /**
- * Parse a period string (e.g., '7d', '30d', '1y') into start/end dates
+ * Parse a period string (e.g., '7d', '30d', '1y', 'all') into start/end dates
  */
 export function parsePeriod(period: string): ParsedPeriod {
   const now = new Date()
   const endDate = new Date(now)
+  
+  // Handle 'all' period - return very old start date
+  if (period.toLowerCase() === 'all') {
+    const startDate = new Date('2000-01-01')
+    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+    return { startDate, endDate, days }
+  }
   
   // Parse period string
   const match = period.match(/^(\d+)([hdwmy])$/i)
@@ -68,10 +75,12 @@ export function parsePeriod(period: string): ParsedPeriod {
  * Determine the best aggregation interval based on period length
  */
 export function getDefaultInterval(days: number): AggregationInterval {
-  if (days <= 2) return 'hourly'
-  if (days <= 60) return 'daily'
-  if (days <= 180) return 'weekly'
-  return 'monthly'
+  if (days < 1) return 'minutely'      // Less than 1 day: minute-by-minute
+  if (days <= 2) return 'hourly'       // 1-2 days: hourly
+  if (days <= 60) return 'daily'       // Up to 2 months: daily
+  if (days <= 180) return 'weekly'     // Up to 6 months: weekly
+  if (days <= 730) return 'monthly'    // Up to 2 years: monthly
+  return 'yearly'                       // More than 2 years: yearly
 }
 
 /**
@@ -81,6 +90,9 @@ function getBucketStart(date: Date, interval: AggregationInterval): Date {
   const result = new Date(date)
   
   switch (interval) {
+    case 'minutely':
+      result.setSeconds(0, 0)
+      break
     case 'hourly':
       result.setMinutes(0, 0, 0)
       break
@@ -96,6 +108,10 @@ function getBucketStart(date: Date, interval: AggregationInterval): Date {
       break
     case 'monthly':
       result.setDate(1)
+      result.setHours(0, 0, 0, 0)
+      break
+    case 'yearly':
+      result.setMonth(0, 1)
       result.setHours(0, 0, 0, 0)
       break
   }
@@ -119,6 +135,9 @@ function generateBuckets(
     buckets.push(new Date(current))
     
     switch (interval) {
+      case 'minutely':
+        current.setMinutes(current.getMinutes() + 1)
+        break
       case 'hourly':
         current.setHours(current.getHours() + 1)
         break
@@ -130,6 +149,9 @@ function generateBuckets(
         break
       case 'monthly':
         current.setMonth(current.getMonth() + 1)
+        break
+      case 'yearly':
+        current.setFullYear(current.getFullYear() + 1)
         break
     }
   }

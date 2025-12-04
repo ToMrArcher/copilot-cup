@@ -21,9 +21,16 @@ export interface SyncResult {
 }
 
 /**
- * Get nested value from an object using dot notation path
+ * Get nested value from an object using dot notation path.
+ * Also handles flattened objects where keys contain dots (e.g., "revenue_2024.total")
  */
 function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
+  // First, try direct key lookup (for flattened objects like GraphQL adapter returns)
+  if (path in obj) {
+    return obj[path]
+  }
+  
+  // Then try nested path traversal
   return path.split('.').reduce((current: unknown, key: string) => {
     if (current && typeof current === 'object') {
       return (current as Record<string, unknown>)[key]

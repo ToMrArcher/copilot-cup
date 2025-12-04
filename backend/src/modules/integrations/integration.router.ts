@@ -419,15 +419,25 @@ integrationRouter.post('/:id/data', async (req: Request, res: Response) => {
       return
     }
 
-    // Expecting { values: { fieldId: value, ... } }
-    const { values } = req.body as { values: Record<string, unknown> }
+    // Expecting { values: { fieldId: value, ... }, timestamp?: string }
+    const { values, timestamp } = req.body as { values: Record<string, unknown>; timestamp?: string }
 
     if (!values || typeof values !== 'object') {
       res.status(400).json({ error: 'Values object is required' })
       return
     }
 
-    const syncedAt = new Date()
+    // Use custom timestamp if provided, otherwise use current time
+    let syncedAt: Date
+    if (timestamp) {
+      syncedAt = new Date(timestamp)
+      if (isNaN(syncedAt.getTime())) {
+        res.status(400).json({ error: 'Invalid timestamp format' })
+        return
+      }
+    } else {
+      syncedAt = new Date()
+    }
     const dataValuesToCreate: { dataFieldId: string; value: unknown; syncedAt: Date }[] = []
 
     for (const field of integration.dataFields) {
@@ -471,6 +481,99 @@ integrationRouter.post('/:id/data', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error submitting manual data:', error)
     res.status(500).json({ error: 'Failed to submit manual data' })
+  }
+})
+
+/**
+ * POST /api/integrations/:id/data/bulk
+ * Bulk import historical data for a MANUAL type integration
+ */
+integrationRouter.post('/:id/data/bulk', async (req: Request, res: Response) => {
+  try {
+    const integration = await prisma.integration.findUnique({
+      where: { id: req.params.id },
+      include: { dataFields: true },
+    })
+
+    if (!integration) {
+      res.status(404).json({ error: 'Integration not found' })
+      return
+    }
+
+    if (integration.type !== 'MANUAL') {
+      res.status(400).json({ error: 'Bulk import is only supported for manual integrations' })
+      return
+    }
+
+    // Expecting { rows: [{ timestamp: string, values: { fieldId: value } }, ...] }
+    const { rows } = req.body as { 
+      rows: Array<{ timestamp: string; values: Record<string, unknown> }> 
+    }
+
+    if (!rows || !Array.isArray(rows) || rows.length === 0) {
+      res.status(400).json({ error: 'Rows array is required and must not be empty' })
+      return
+    }
+
+    // Validate and prepare data values
+    const dataValuesToCreate: { dataFieldId: string; value: unknown; syncedAt: Date }[] = []
+    const fieldIds = new Set(integration.dataFields.map(f => f.id))
+
+    for (const row of rows) {
+      // Validate timestamp
+      const syncedAt = new Date(row.timestamp)
+      if (isNaN(syncedAt.getTime())) {
+        res.status(400).json({ error: `Invalid timestamp: ${row.timestamp}` })
+        return
+      }
+
+      // Process each field value
+      for (const [fieldId, value] of Object.entries(row.values)) {
+        if (fieldIds.has(fieldId) && value !== undefined && value !== null) {
+          dataValuesToCreate.push({
+            dataFieldId: fieldId,
+            value,
+            syncedAt,
+          })
+        }
+      }
+    }
+
+    if (dataValuesToCreate.length === 0) {
+      res.status(400).json({ error: 'No valid data values found in rows' })
+      return
+    }
+
+    // Bulk create data values
+    await prisma.dataValue.createMany({
+      data: dataValuesToCreate.map(dv => ({
+        dataFieldId: dv.dataFieldId,
+        value: dv.value as object,
+        syncedAt: dv.syncedAt,
+      })),
+    })
+
+    // Update last sync time to the most recent timestamp
+    const mostRecentTimestamp = rows.reduce((max, row) => {
+      const ts = new Date(row.timestamp)
+      return ts > max ? ts : max
+    }, new Date(0))
+
+    await prisma.integration.update({
+      where: { id: req.params.id },
+      data: {
+        lastSync: mostRecentTimestamp,
+        status: 'synced',
+      },
+    })
+
+    res.json({
+      success: true,
+      imported: dataValuesToCreate.length,
+    })
+  } catch (error) {
+    console.error('Error importing bulk data:', error)
+    res.status(500).json({ error: 'Failed to import bulk data' })
   }
 })
 

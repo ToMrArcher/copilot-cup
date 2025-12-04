@@ -24,7 +24,20 @@ export interface ChartWidgetProps {
   onDelete?: () => void
 }
 
-const defaultPeriods = ['7d', '30d', '90d']
+const defaultPeriods = ['1h', '24h', '7d', '30d', '90d', '6m', '1y', 'all']
+
+// Human-readable labels for period buttons
+const periodLabels: Record<string, string> = {
+  '1h': '1H',
+  '6h': '6H',
+  '24h': '24H',
+  '7d': '7D',
+  '30d': '30D',
+  '90d': '90D',
+  '6m': '6M',
+  '1y': '1Y',
+  'all': 'All',
+}
 
 export function ChartWidget({
   title,
@@ -111,7 +124,7 @@ export function ChartWidget({
                     period !== periods[0] ? '-ml-px' : ''
                   }`}
                 >
-                  {period}
+                  {periodLabels[period] || period}
                 </button>
               ))}
             </div>

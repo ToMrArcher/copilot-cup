@@ -8,6 +8,8 @@ interface IntegrationCardProps {
   onTest: (id: string) => void
   onEnterData?: (id: string) => void
   onViewHistory?: (id: string) => void
+  onImportCSV?: (id: string) => void
+  onBulkEntry?: (id: string) => void
 }
 
 const statusStyles: Record<IntegrationStatus, { bg: string; text: string; dot: string }> = {
@@ -49,6 +51,8 @@ export function IntegrationCard({
   onTest,
   onEnterData,
   onViewHistory,
+  onImportCSV,
+  onBulkEntry,
 }: IntegrationCardProps) {
   const status = statusStyles[integration.status]
   const isManual = integration.type === 'MANUAL'
@@ -119,12 +123,32 @@ export function IntegrationCard({
 
       <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex gap-2 flex-wrap">
         {isManual && onEnterData ? (
-          <button
-            onClick={() => onEnterData(integration.id)}
-            className="flex-1 px-3 py-1.5 text-sm text-white bg-violet-600 hover:bg-violet-700 rounded-md transition-colors font-medium"
-          >
-            Enter Data
-          </button>
+          <>
+            <button
+              onClick={() => onEnterData(integration.id)}
+              className="flex-1 px-3 py-1.5 text-sm text-white bg-violet-600 hover:bg-violet-700 rounded-md transition-colors font-medium"
+            >
+              Enter Data
+            </button>
+            {onImportCSV && (
+              <button
+                onClick={() => onImportCSV(integration.id)}
+                className="px-3 py-1.5 text-sm text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/30 rounded-md transition-colors"
+                title="Import CSV"
+              >
+                📥 CSV
+              </button>
+            )}
+            {onBulkEntry && (
+              <button
+                onClick={() => onBulkEntry(integration.id)}
+                className="px-3 py-1.5 text-sm text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/30 rounded-md transition-colors"
+                title="Bulk Entry"
+              >
+                📋 Bulk
+              </button>
+            )}
+          </>
         ) : (
           <button
             onClick={() => onSync(integration.id)}

@@ -4,7 +4,7 @@
  */
 
 // Aggregation intervals for time-series data
-export type AggregationInterval = 'hourly' | 'daily' | 'weekly' | 'monthly'
+export type AggregationInterval = 'minutely' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly'
 
 // A single data point in a time-series
 export interface KpiHistoryPoint {

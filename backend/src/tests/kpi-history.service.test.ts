@@ -44,10 +44,21 @@ describe('KPI History Service', () => {
       const result = parsePeriod('')
       expect(result.days).toBe(30)
     })
+
+    it('should handle "all" period returning a very old start date', () => {
+      const result = parsePeriod('all')
+      expect(result.startDate.getFullYear()).toBe(2000)
+      expect(result.days).toBeGreaterThan(365 * 20) // At least 20 years
+    })
   })
 
   describe('getDefaultInterval', () => {
-    it('should return hourly for periods <= 2 days', () => {
+    it('should return minutely for periods < 1 day', () => {
+      expect(getDefaultInterval(0.5)).toBe('minutely')
+      expect(getDefaultInterval(0.1)).toBe('minutely')
+    })
+
+    it('should return hourly for periods 1-2 days', () => {
       expect(getDefaultInterval(1)).toBe('hourly')
       expect(getDefaultInterval(2)).toBe('hourly')
     })
@@ -63,9 +74,15 @@ describe('KPI History Service', () => {
       expect(getDefaultInterval(180)).toBe('weekly')
     })
 
-    it('should return monthly for periods > 180 days', () => {
+    it('should return monthly for periods <= 730 days (2 years)', () => {
       expect(getDefaultInterval(365)).toBe('monthly')
       expect(getDefaultInterval(730)).toBe('monthly')
+    })
+
+    it('should return yearly for periods > 730 days', () => {
+      expect(getDefaultInterval(731)).toBe('yearly')
+      expect(getDefaultInterval(1000)).toBe('yearly')
+      expect(getDefaultInterval(3650)).toBe('yearly')
     })
   })
 })

@@ -114,6 +114,25 @@ services:
     networks:
       - kpi-network
 
+  # ===========================================
+  # Xledger Mock Server - GraphQL API for Financial Data
+  # ===========================================
+  xledger-mock:
+    build:
+      context: ./xledger-mock
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+    networks:
+      - kpi-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 networks:
   kpi-network:
     driver: bridge

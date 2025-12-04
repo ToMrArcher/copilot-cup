@@ -216,10 +216,15 @@ export function WidgetPicker({ dashboardId, isOpen, onClose }: WidgetPickerProps
                       onChange={(e) => setConfig({ ...config, period: e.target.value })}
                       className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2"
                     >
+                      <option value="1h">Last hour</option>
+                      <option value="6h">Last 6 hours</option>
+                      <option value="24h">Last 24 hours</option>
                       <option value="7d">Last 7 days</option>
                       <option value="30d">Last 30 days</option>
                       <option value="90d">Last 90 days</option>
+                      <option value="6m">Last 6 months</option>
                       <option value="1y">Last year</option>
+                      <option value="all">All time</option>
                     </select>
                   </div>
                 )}

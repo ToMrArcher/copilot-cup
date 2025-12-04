@@ -222,12 +222,22 @@ export const integrationsApi = {
     }>(`/api/integrations/${id}/data`),
 
   // Submit manual data values
-  submitData: (id: string, values: Record<string, unknown>) =>
+  submitData: (id: string, values: Record<string, unknown>, timestamp?: string) =>
     fetchApi<{ success: boolean; fieldsUpdated: number; syncedAt: string }>(
       `/api/integrations/${id}/data`,
       {
         method: 'POST',
-        body: JSON.stringify({ values }),
+        body: JSON.stringify({ values, timestamp }),
+      }
+    ),
+
+  // Import bulk data from CSV
+  importBulkData: (id: string, rows: Array<{ timestamp: string; values: Record<string, unknown> }>) =>
+    fetchApi<{ success: boolean; imported: number }>(
+      `/api/integrations/${id}/data/bulk`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ rows }),
       }
     ),
 

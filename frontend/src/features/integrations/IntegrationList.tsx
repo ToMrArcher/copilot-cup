@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { IntegrationCard } from './IntegrationCard'
 import { ManualDataEntryModal } from './ManualDataEntryModal'
+import { CSVImportModal } from './CSVImportModal'
+import { BulkEntryModal } from './BulkEntryModal'
 import { SyncHistoryModal } from './SyncHistoryModal'
 import type { Integration } from '../../types/integration'
 import {
@@ -56,6 +58,8 @@ export function IntegrationList() {
   const deleteIntegration = useDeleteIntegration()
   const [actionId, setActionId] = useState<string | null>(null)
   const [dataEntryIntegration, setDataEntryIntegration] = useState<Integration | null>(null)
+  const [csvImportIntegration, setCsvImportIntegration] = useState<Integration | null>(null)
+  const [bulkEntryIntegration, setBulkEntryIntegration] = useState<Integration | null>(null)
   const [historyIntegration, setHistoryIntegration] = useState<Integration | null>(null)
 
   // Use API data if available, otherwise fall back to mock data for development
@@ -65,6 +69,20 @@ export function IntegrationList() {
     const integration = integrations.find(i => i.id === id)
     if (integration) {
       setDataEntryIntegration(integration)
+    }
+  }
+
+  const handleImportCSV = (id: string) => {
+    const integration = integrations.find(i => i.id === id)
+    if (integration) {
+      setCsvImportIntegration(integration)
+    }
+  }
+
+  const handleBulkEntry = (id: string) => {
+    const integration = integrations.find(i => i.id === id)
+    if (integration) {
+      setBulkEntryIntegration(integration)
     }
   }
 
@@ -163,6 +181,8 @@ export function IntegrationList() {
                 onSync={handleSync}
                 onTest={handleTest}
                 onEnterData={handleEnterData}
+                onImportCSV={handleImportCSV}
+                onBulkEntry={handleBulkEntry}
                 onViewHistory={handleViewHistory}
               />
             </div>
@@ -176,6 +196,24 @@ export function IntegrationList() {
           integration={dataEntryIntegration}
           isOpen={true}
           onClose={() => setDataEntryIntegration(null)}
+        />
+      )}
+
+      {/* CSV Import Modal */}
+      {csvImportIntegration && (
+        <CSVImportModal
+          integration={csvImportIntegration}
+          isOpen={true}
+          onClose={() => setCsvImportIntegration(null)}
+        />
+      )}
+
+      {/* Bulk Entry Modal */}
+      {bulkEntryIntegration && (
+        <BulkEntryModal
+          integration={bulkEntryIntegration}
+          isOpen={true}
+          onClose={() => setBulkEntryIntegration(null)}
         />
       )}
 

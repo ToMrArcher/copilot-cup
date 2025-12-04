@@ -32,6 +32,9 @@ export function ManualDataEntryModal({
   const queryClient = useQueryClient()
   const [values, setValues] = useState<Record<string, string>>({})
   const [error, setError] = useState<string | null>(null)
+  const [useCustomDate, setUseCustomDate] = useState(false)
+  const [customDate, setCustomDate] = useState('')
+  const [customTime, setCustomTime] = useState('')
 
   // Fetch current data values
   const { data: currentData, isLoading: isLoadingData } = useQuery({
@@ -53,10 +56,28 @@ export function ManualDataEntryModal({
     }
   }, [currentData])
 
+  // Reset custom date fields when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setUseCustomDate(false)
+      setCustomDate('')
+      setCustomTime('')
+      setError(null)
+    }
+  }, [isOpen])
+
   // Submit mutation
   const submitMutation = useMutation({
     mutationFn: async (formValues: Record<string, unknown>) => {
-      return integrationsApi.submitData(integration.id, formValues)
+      // Build timestamp if custom date is set
+      let timestamp: string | undefined
+      if (useCustomDate && customDate) {
+        const dateStr = customTime 
+          ? `${customDate}T${customTime}:00`
+          : `${customDate}T12:00:00`
+        timestamp = new Date(dateStr).toISOString()
+      }
+      return integrationsApi.submitData(integration.id, formValues, timestamp)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['integrations'] })
@@ -94,6 +115,12 @@ export function ManualDataEntryModal({
 
     if (Object.keys(typedValues).length === 0) {
       setError('Please enter at least one value')
+      return
+    }
+
+    // Validate custom date if enabled
+    if (useCustomDate && !customDate) {
+      setError('Please select a date for historical data entry')
       return
     }
 
@@ -191,6 +218,49 @@ export function ManualDataEntryModal({
                     )}
                   </div>
                 )})}
+              </div>
+
+              {/* Custom Date/Time Picker */}
+              <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex items-center mb-3">
+                  <input
+                    type="checkbox"
+                    id="useCustomDate"
+                    checked={useCustomDate}
+                    onChange={e => setUseCustomDate(e.target.checked)}
+                    className="h-4 w-4 text-violet-600 rounded border-gray-300 dark:border-gray-600"
+                  />
+                  <label htmlFor="useCustomDate" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    Use custom date/time (for historical data)
+                  </label>
+                </div>
+                
+                {useCustomDate && (
+                  <div className="flex gap-3">
+                    <div className="flex-1">
+                      <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                        Date
+                      </label>
+                      <input
+                        type="date"
+                        value={customDate}
+                        onChange={e => setCustomDate(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:ring-violet-500 focus:border-violet-500 text-sm"
+                      />
+                    </div>
+                    <div className="w-32">
+                      <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                        Time (optional)
+                      </label>
+                      <input
+                        type="time"
+                        value={customTime}
+                        onChange={e => setCustomTime(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:ring-violet-500 focus:border-violet-500 text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Error */}
