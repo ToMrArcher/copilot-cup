@@ -82,6 +82,7 @@ export function useSyncIntegration(integrationId: string) {
     mutationFn: () => integrationsApi.sync(integrationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.integration(integrationId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.integrations })
     },
   })
 }

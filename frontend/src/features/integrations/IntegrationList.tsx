@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { IntegrationCard } from './IntegrationCard'
 import { ManualDataEntryModal } from './ManualDataEntryModal'
 import type { Integration } from '../../types/integration'
 import {
   useIntegrations,
   useDeleteIntegration,
+  queryKeys,
 } from '../../hooks/useIntegrations'
+import { integrationsApi } from '../../lib/api'
 
 // Mock data for development fallback
 const mockIntegrations: Integration[] = [
@@ -39,6 +42,7 @@ const mockIntegrations: Integration[] = [
 
 export function IntegrationList() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { data: apiIntegrations, isLoading, error } = useIntegrations()
   const deleteIntegration = useDeleteIntegration()
   const [actionId, setActionId] = useState<string | null>(null)
@@ -57,10 +61,10 @@ export function IntegrationList() {
   const handleSync = async (id: string) => {
     setActionId(id)
     try {
-      // Create a temporary hook usage - in production, this would be handled differently
-      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/integrations/${id}/sync`, {
-        method: 'POST',
-      })
+      await integrationsApi.sync(id)
+      // Invalidate both the specific integration and the list
+      queryClient.invalidateQueries({ queryKey: queryKeys.integration(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.integrations })
     } catch (e) {
       console.error('Sync failed', e)
     }
@@ -70,11 +74,8 @@ export function IntegrationList() {
   const handleTest = async (id: string) => {
     setActionId(id)
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/integrations/${id}/test`, {
-        method: 'POST',
-      })
-      const data = await res.json()
-      alert(data.success ? 'Connection successful!' : `Connection failed: ${data.error}`)
+      const result = await integrationsApi.testConnection(id)
+      alert(result.success ? 'Connection successful!' : `Connection failed: ${result.error}`)
     } catch {
       alert('Connection test failed')
     }

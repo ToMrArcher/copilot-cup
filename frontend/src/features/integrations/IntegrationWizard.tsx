@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import type { IntegrationType, IntegrationConfig, FieldSchema, DataField } from '../../types/integration'
 import { SelectTypeStep } from './wizard/SelectTypeStep'
 import { ConfigureConnectionStep } from './wizard/ConfigureConnectionStep'
 import { MapFieldsStep } from './wizard/MapFieldsStep'
 import { ReviewStep } from './wizard/ReviewStep'
 import { integrationsApi, dataFieldsApi } from '../../lib/api'
+import { queryKeys } from '../../hooks/useIntegrations'
 
 export type WizardStep = 'type' | 'connection' | 'fields' | 'review'
 
@@ -40,6 +42,7 @@ const steps: { id: WizardStep; label: string }[] = [
 
 export function IntegrationWizard() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { id } = useParams<{ id: string }>()
   const isEditMode = !!id
   
@@ -64,9 +67,10 @@ export function IntegrationWizard() {
             discoveredFields: [],
             selectedFields: integration.dataFields?.map(f => ({
               id: f.id,
-              sourceField: f.path,
-              targetField: f.name,
-              fieldType: f.dataType,
+              // Handle both legacy and new field formats
+              sourceField: 'path' in f ? f.path : f.sourceField,
+              targetField: 'name' in f ? f.name : f.targetField,
+              fieldType: 'dataType' in f ? f.dataType as DataField['fieldType'] : f.fieldType,
             })) || [],
           })
         })
@@ -163,6 +167,9 @@ export function IntegrationWizard() {
         }
       }
 
+      // Invalidate the integrations cache to refresh the list
+      queryClient.invalidateQueries({ queryKey: queryKeys.integrations })
+      
       navigate('/integrations')
     } catch (error) {
       console.error(`Failed to ${isEditMode ? 'update' : 'create'} integration:`, error)

@@ -85,6 +85,7 @@ export function MapFieldsStep({
   isDiscovering = false,
 }: MapFieldsStepProps) {
   const [showAddCustom, setShowAddCustom] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const [customField, setCustomField] = useState({
     sourceField: '',
     targetField: '',
@@ -166,9 +167,71 @@ export function MapFieldsStep({
         <div className="mb-6">
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Discovered Fields
+            {searchQuery && (
+              <span className="ml-2 text-gray-500 dark:text-gray-400 font-normal">
+                ({discoveredFields.filter(f => {
+                  const query = searchQuery.toLowerCase()
+                  const name = f.name.toLowerCase()
+                  const path = (f.path || '').toLowerCase()
+                  return name.includes(query) || path.includes(query)
+                }).length} of {discoveredFields.length})
+              </span>
+            )}
           </h3>
+          
+          {/* Search Input */}
+          <div className="relative mb-3">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              type="text"
+              placeholder="Search fields..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  setSearchQuery('')
+                }
+              }}
+              className="w-full pl-10 pr-10 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+
           <div className="space-y-2 max-h-80 overflow-y-auto border dark:border-gray-600 rounded-md p-3 bg-gray-50 dark:bg-gray-800">
-            {discoveredFields.map(field => {
+            {(() => {
+              const filteredFields = discoveredFields.filter(f => {
+                if (!searchQuery) return true
+                const query = searchQuery.toLowerCase()
+                const name = f.name.toLowerCase()
+                const path = (f.path || '').toLowerCase()
+                return name.includes(query) || path.includes(query)
+              })
+              
+              if (filteredFields.length === 0) {
+                return (
+                  <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                    <svg className="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <p>No fields match "{searchQuery}"</p>
+                  </div>
+                )
+              }
+              
+              return filteredFields.map(field => {
               const fieldPath = field.path || field.name
               const isSelected = selectedFields.some(f => f.sourceField === fieldPath)
               const fieldType = getFieldType(field)
@@ -208,7 +271,8 @@ export function MapFieldsStep({
                   </div>
                 </label>
               )
-            })}
+            })
+            })()}
           </div>
         </div>
       )}
