@@ -7,6 +7,7 @@ interface IntegrationCardProps {
   onSync: (id: string) => void
   onTest: (id: string) => void
   onEnterData?: (id: string) => void
+  onViewHistory?: (id: string) => void
 }
 
 const statusStyles: Record<IntegrationStatus, { bg: string; text: string; dot: string }> = {
@@ -47,6 +48,7 @@ export function IntegrationCard({
   onSync,
   onTest,
   onEnterData,
+  onViewHistory,
 }: IntegrationCardProps) {
   const status = statusStyles[integration.status]
   const isManual = integration.type === 'MANUAL'
@@ -78,6 +80,35 @@ export function IntegrationCard({
           <span className="text-gray-500 dark:text-gray-400">Fields mapped</span>
           <span className="text-gray-700 dark:text-gray-300">{integration.dataFields?.length || 0}</span>
         </div>
+        {/* Sync Settings */}
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-500 dark:text-gray-400">Auto Sync</span>
+          <span className={`${integration.syncEnabled ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
+            {integration.syncEnabled ? (
+              <>
+                ✓ {integration.syncInterval === 300 ? '5 min' :
+                   integration.syncInterval === 900 ? '15 min' :
+                   integration.syncInterval === 1800 ? '30 min' :
+                   integration.syncInterval === 3600 ? '1 hr' :
+                   integration.syncInterval === 21600 ? '6 hr' :
+                   integration.syncInterval === 86400 ? '24 hr' :
+                   `${integration.syncInterval}s`}
+              </>
+            ) : 'Off'}
+          </span>
+        </div>
+        {integration.nextSyncAt && integration.syncEnabled && (
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-500 dark:text-gray-400">Next sync</span>
+            <span className="text-gray-700 dark:text-gray-300">
+              {formatRelativeTime(integration.nextSyncAt).replace(' ago', '') === 'Just now' 
+                ? 'Soon' 
+                : formatRelativeTime(integration.nextSyncAt).includes('ago')
+                  ? 'Overdue'
+                  : new Date(integration.nextSyncAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+        )}
         {integration.config?.url && (
           <div className="text-sm overflow-hidden">
             <span className="text-gray-500 dark:text-gray-400">URL: </span>
@@ -86,7 +117,7 @@ export function IntegrationCard({
         )}
       </div>
 
-      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex gap-2">
+      <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex gap-2 flex-wrap">
         {isManual && onEnterData ? (
           <button
             onClick={() => onEnterData(integration.id)}
@@ -108,6 +139,14 @@ export function IntegrationCard({
         >
           Test
         </button>
+        {onViewHistory && (
+          <button
+            onClick={() => onViewHistory(integration.id)}
+            className="flex-1 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"
+          >
+            History
+          </button>
+        )}
         <button
           onClick={() => onEdit(integration.id)}
           className="flex-1 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"

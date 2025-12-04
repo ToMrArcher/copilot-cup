@@ -75,6 +75,31 @@ services:
       start_period: 10s
 
   # ===========================================
+  # Background Sync Worker
+  # ===========================================
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/kpi_dashboard
+      - ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    networks:
+      - kpi-network
+    command: sh -c "npx prisma generate && npm run worker:dev"
+    restart: unless-stopped
+
+  # ===========================================
   # Dummy Data Server - For Testing Integrations
   # ===========================================
   dummy-server:

@@ -4,7 +4,7 @@
  * This module defines the pluggable adapter architecture for data source integrations.
  */
 
-export type IntegrationType = 'API' | 'MANUAL' | 'WEBHOOK'
+export type IntegrationType = 'API' | 'MANUAL' | 'WEBHOOK' | 'GRAPHQL'
 
 export interface ConnectionResult {
   success: boolean
@@ -52,6 +52,11 @@ export interface IntegrationConfig {
   
   // Webhook-specific
   webhookSecret?: string
+  
+  // GraphQL-specific
+  query?: string                         // The GraphQL query string
+  variables?: Record<string, unknown>    // Optional query variables
+  operationName?: string                 // Optional operation name for multi-operation documents
 }
 
 /**

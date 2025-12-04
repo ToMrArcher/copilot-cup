@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { IntegrationCard } from './IntegrationCard'
 import { ManualDataEntryModal } from './ManualDataEntryModal'
+import { SyncHistoryModal } from './SyncHistoryModal'
 import type { Integration } from '../../types/integration'
 import {
   useIntegrations,
@@ -26,6 +27,10 @@ const mockIntegrations: Integration[] = [
       { id: '1', integrationId: '1', name: 'revenue', path: 'revenue', dataType: 'number', createdAt: '' },
       { id: '2', integrationId: '1', name: 'orders', path: 'orders', dataType: 'number', createdAt: '' },
     ],
+    syncInterval: 3600,
+    syncEnabled: true,
+    nextSyncAt: new Date(Date.now() + 1000 * 60 * 55).toISOString(),
+    retryCount: 0,
   },
   {
     id: '2',
@@ -37,6 +42,10 @@ const mockIntegrations: Integration[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     dataFields: [],
+    syncInterval: null,
+    syncEnabled: false,
+    nextSyncAt: null,
+    retryCount: 0,
   },
 ]
 
@@ -47,6 +56,7 @@ export function IntegrationList() {
   const deleteIntegration = useDeleteIntegration()
   const [actionId, setActionId] = useState<string | null>(null)
   const [dataEntryIntegration, setDataEntryIntegration] = useState<Integration | null>(null)
+  const [historyIntegration, setHistoryIntegration] = useState<Integration | null>(null)
 
   // Use API data if available, otherwise fall back to mock data for development
   const integrations = apiIntegrations || mockIntegrations
@@ -55,6 +65,13 @@ export function IntegrationList() {
     const integration = integrations.find(i => i.id === id)
     if (integration) {
       setDataEntryIntegration(integration)
+    }
+  }
+
+  const handleViewHistory = (id: string) => {
+    const integration = integrations.find(i => i.id === id)
+    if (integration) {
+      setHistoryIntegration(integration)
     }
   }
 
@@ -146,6 +163,7 @@ export function IntegrationList() {
                 onSync={handleSync}
                 onTest={handleTest}
                 onEnterData={handleEnterData}
+                onViewHistory={handleViewHistory}
               />
             </div>
           ))}
@@ -158,6 +176,15 @@ export function IntegrationList() {
           integration={dataEntryIntegration}
           isOpen={true}
           onClose={() => setDataEntryIntegration(null)}
+        />
+      )}
+
+      {/* Sync History Modal */}
+      {historyIntegration && (
+        <SyncHistoryModal
+          integration={historyIntegration}
+          isOpen={true}
+          onClose={() => setHistoryIntegration(null)}
         />
       )}
     </div>

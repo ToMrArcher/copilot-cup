@@ -93,6 +93,36 @@ export function ReviewStep({ state, selectedFields }: ReviewStepProps) {
           )}
         </section>
 
+        {/* Sync Settings */}
+        <section className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Sync Settings</h3>
+          <dl className="grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <dt className="text-gray-500 dark:text-gray-400">Auto Sync</dt>
+              <dd className="font-medium text-gray-900 dark:text-gray-100">
+                {state.syncEnabled ? (
+                  <span className="text-green-600 dark:text-green-400">✓ Enabled</span>
+                ) : (
+                  <span className="text-gray-500 dark:text-gray-400">Disabled</span>
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-gray-500 dark:text-gray-400">Sync Interval</dt>
+              <dd className="font-medium text-gray-900 dark:text-gray-100">
+                {state.syncInterval === null ? 'Manual only' :
+                 state.syncInterval === 300 ? 'Every 5 minutes' :
+                 state.syncInterval === 900 ? 'Every 15 minutes' :
+                 state.syncInterval === 1800 ? 'Every 30 minutes' :
+                 state.syncInterval === 3600 ? 'Every hour' :
+                 state.syncInterval === 21600 ? 'Every 6 hours' :
+                 state.syncInterval === 86400 ? 'Daily' :
+                 `Every ${state.syncInterval} seconds`}
+              </dd>
+            </div>
+          </dl>
+        </section>
+
         {/* Field Mappings */}
         <section className="bg-gray-50 rounded-lg p-4">
           <h3 className="font-medium text-gray-900 mb-3">

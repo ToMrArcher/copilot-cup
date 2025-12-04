@@ -138,12 +138,16 @@ export interface CreateIntegrationInput {
   name: string
   type: IntegrationType
   config: Record<string, unknown>
+  syncInterval?: number | null
+  syncEnabled?: boolean
 }
 
 export interface UpdateIntegrationInput {
   name?: string
   config?: Record<string, unknown>
   isActive?: boolean
+  syncInterval?: number | null
+  syncEnabled?: boolean
 }
 
 export const integrationsApi = {
@@ -163,7 +167,7 @@ export const integrationsApi = {
   // Update integration
   update: (id: string, data: UpdateIntegrationInput) =>
     fetchApi<Integration>(`/api/integrations/${id}`, {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify(data),
     }),
 
@@ -226,6 +230,25 @@ export const integrationsApi = {
         body: JSON.stringify({ values }),
       }
     ),
+
+  // Get sync history
+  getSyncHistory: (id: string, page = 1, pageSize = 20) =>
+    fetchApi<{
+      logs: {
+        id: string
+        integrationId: string
+        status: 'PENDING' | 'RUNNING' | 'SUCCESS' | 'FAILED'
+        startedAt: string
+        completedAt: string | null
+        duration: number | null
+        recordsCount: number | null
+        errorMessage: string | null
+        createdAt: string
+      }[]
+      total: number
+      page: number
+      pageSize: number
+    }>(`/api/integrations/${id}/sync-history?page=${page}&pageSize=${pageSize}`),
 }
 
 // ============ Data Fields API ============

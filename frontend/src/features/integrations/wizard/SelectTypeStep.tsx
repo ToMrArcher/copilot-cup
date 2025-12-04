@@ -19,6 +19,12 @@ const integrationTypes: {
     icon: '🔌',
   },
   {
+    type: 'GRAPHQL',
+    name: 'GraphQL API',
+    description: 'Connect to GraphQL endpoints with custom queries',
+    icon: '◈',
+  },
+  {
     type: 'MANUAL',
     name: 'Manual Input',
     description: 'Enter data manually for KPIs without external sources',

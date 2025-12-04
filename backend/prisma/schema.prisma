@@ -46,23 +46,57 @@ enum AccessPermission {
 // ==========================================
 
 model Integration {
-  id        String          @id @default(cuid())
-  name      String
-  type      IntegrationType
-  config    Json            // Encrypted configuration
-  status    String          @default("pending")
-  lastSync  DateTime?
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
+  id           String          @id @default(cuid())
+  name         String
+  type         IntegrationType
+  config       Json            // Encrypted configuration
+  status       String          @default("pending")
+  lastSync     DateTime?
+  
+  // Scheduled sync settings
+  syncInterval Int?            @default(3600)  // seconds between syncs, null = manual only
+  syncEnabled  Boolean         @default(true)  // whether scheduled sync is enabled
+  nextSyncAt   DateTime?                       // when the next sync should occur
+  retryCount   Int             @default(0)     // consecutive failure count
+  
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 
-  dataFields DataField[]
-  kpis       Kpi[]
+  dataFields   DataField[]
+  kpis         Kpi[]
+  syncLogs     SyncLog[]
+}
+
+// Sync history log
+model SyncLog {
+  id            String      @id @default(cuid())
+  integrationId String
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  
+  status        SyncStatus
+  startedAt     DateTime    @default(now())
+  completedAt   DateTime?
+  duration      Int?        // milliseconds
+  recordsCount  Int?        // number of data values synced
+  errorMessage  String?     @db.Text
+  
+  createdAt     DateTime    @default(now())
+  
+  @@index([integrationId, createdAt(sort: Desc)])
+}
+
+enum SyncStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
 }
 
 enum IntegrationType {
   API
   MANUAL
   WEBHOOK
+  GRAPHQL
 }
 
 model DataField {

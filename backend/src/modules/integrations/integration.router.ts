@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express'
 import { prisma } from '../../db/client'
 import { AdapterRegistry } from './adapter.registry'
 import { encryptJson, decryptJson, maskSensitiveValue } from '../../services/crypto.service'
+import { executeSyncWithLogging, getSyncHistory, calculateNextSyncAt } from '../../services/sync.service'
 import { IntegrationConfig, IntegrationType } from './adapter.interface'
 import { dataFieldRouter } from './datafield.router'
 
@@ -99,10 +100,12 @@ integrationRouter.get('/:id', async (req: Request, res: Response) => {
  */
 integrationRouter.post('/', async (req: Request, res: Response) => {
   try {
-    const { name, type, config } = req.body as {
+    const { name, type, config, syncInterval, syncEnabled } = req.body as {
       name: string
       type: IntegrationType
       config: IntegrationConfig
+      syncInterval?: number | null
+      syncEnabled?: boolean
     }
 
     if (!name || !type) {
@@ -118,12 +121,22 @@ integrationRouter.post('/', async (req: Request, res: Response) => {
     // Encrypt the config before storing
     const encryptedConfig = encryptJson(config || {})
 
+    // Calculate next sync time if sync is enabled and interval is set
+    const effectiveSyncEnabled = syncEnabled ?? true
+    const effectiveSyncInterval = syncInterval ?? 3600
+    const nextSyncAt = effectiveSyncEnabled && effectiveSyncInterval
+      ? calculateNextSyncAt(effectiveSyncInterval)
+      : null
+
     const integration = await prisma.integration.create({
       data: {
         name,
         type,
         config: encryptedConfig,
         status: 'pending',
+        syncInterval: effectiveSyncInterval,
+        syncEnabled: effectiveSyncEnabled,
+        nextSyncAt,
       },
     })
 
@@ -143,9 +156,11 @@ integrationRouter.post('/', async (req: Request, res: Response) => {
  */
 integrationRouter.put('/:id', async (req: Request, res: Response) => {
   try {
-    const { name, config } = req.body as {
+    const { name, config, syncInterval, syncEnabled } = req.body as {
       name?: string
       config?: IntegrationConfig
+      syncInterval?: number | null
+      syncEnabled?: boolean
     }
 
     const existing = await prisma.integration.findUnique({
@@ -170,9 +185,20 @@ integrationRouter.put('/:id', async (req: Request, res: Response) => {
       newConfig = { ...existingConfig, ...config }
     }
 
-    const updateData: { name?: string; config?: string } = {}
+    const updateData: { name?: string; config?: string; syncInterval?: number | null; syncEnabled?: boolean; nextSyncAt?: Date | null } = {}
     if (name) updateData.name = name
     if (newConfig) updateData.config = encryptJson(newConfig)
+    if (syncInterval !== undefined) updateData.syncInterval = syncInterval
+    if (syncEnabled !== undefined) updateData.syncEnabled = syncEnabled
+
+    // Recalculate nextSyncAt if sync settings changed
+    if (syncInterval !== undefined || syncEnabled !== undefined) {
+      const effectiveSyncEnabled = syncEnabled ?? existing.syncEnabled
+      const effectiveSyncInterval = syncInterval ?? existing.syncInterval
+      updateData.nextSyncAt = effectiveSyncEnabled && effectiveSyncInterval
+        ? calculateNextSyncAt(effectiveSyncInterval)
+        : null
+    }
 
     const integration = await prisma.integration.update({
       where: { id: req.params.id },
@@ -218,6 +244,60 @@ integrationRouter.delete('/:id', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error deleting integration:', error)
     res.status(500).json({ error: 'Failed to delete integration' })
+  }
+})
+
+/**
+ * PATCH /api/integrations/:id/sync-settings
+ * Update sync settings for an integration
+ */
+integrationRouter.patch('/:id/sync-settings', async (req: Request, res: Response) => {
+  try {
+    const { syncInterval, syncEnabled } = req.body as {
+      syncInterval?: number | null
+      syncEnabled?: boolean
+    }
+
+    const existing = await prisma.integration.findUnique({
+      where: { id: req.params.id },
+    })
+
+    if (!existing) {
+      res.status(404).json({ error: 'Integration not found' })
+      return
+    }
+
+    // Calculate new values
+    const effectiveSyncEnabled = syncEnabled ?? existing.syncEnabled
+    const effectiveSyncInterval = syncInterval ?? existing.syncInterval
+
+    // Calculate next sync time
+    const nextSyncAt = effectiveSyncEnabled && effectiveSyncInterval
+      ? calculateNextSyncAt(effectiveSyncInterval)
+      : null
+
+    const integration = await prisma.integration.update({
+      where: { id: req.params.id },
+      data: {
+        syncInterval: syncInterval !== undefined ? syncInterval : undefined,
+        syncEnabled: syncEnabled !== undefined ? syncEnabled : undefined,
+        nextSyncAt,
+        retryCount: 0, // Reset retry count when settings change
+      },
+      include: {
+        dataFields: true,
+      },
+    })
+
+    res.json({
+      id: integration.id,
+      syncInterval: integration.syncInterval,
+      syncEnabled: integration.syncEnabled,
+      nextSyncAt: integration.nextSyncAt,
+    })
+  } catch (error) {
+    console.error('Error updating sync settings:', error)
+    res.status(500).json({ error: 'Failed to update sync settings' })
   }
 })
 
@@ -271,67 +351,50 @@ integrationRouter.post('/:id/sync', async (req: Request, res: Response) => {
       return
     }
 
-    const adapter = AdapterRegistry.get(integration.type as IntegrationType)
-    const config = decryptJson<IntegrationConfig>(integration.config as string)
-    const fieldPaths = integration.dataFields.map(f => f.path)
-
-    const result = await adapter.fetchData(config, fieldPaths)
-
-    if (result.success && result.data.length > 0) {
-      // Store synced values for each data field
-      const syncedAt = new Date()
-      const dataValuesToCreate: { dataFieldId: string; value: unknown; syncedAt: Date }[] = []
-
-      for (const field of integration.dataFields) {
-        // Extract the value for this field from each row
-        // Aggregate all values for the field path
-        const values = result.data.map(row => {
-          // Navigate the field path (e.g., "revenue" or "data.total")
-          return getNestedValue(row, field.path)
-        }).filter(v => v !== undefined && v !== null)
-
-        if (values.length > 0) {
-          // Store as single value (first) or array depending on data
-          const valueToStore = values.length === 1 ? values[0] : values
-          dataValuesToCreate.push({
-            dataFieldId: field.id,
-            value: valueToStore,
-            syncedAt,
-          })
-        }
-      }
-
-      // Bulk create data values
-      if (dataValuesToCreate.length > 0) {
-        await prisma.dataValue.createMany({
-          data: dataValuesToCreate.map(dv => ({
-            dataFieldId: dv.dataFieldId,
-            value: dv.value as object,
-            syncedAt: dv.syncedAt,
-          })),
-        })
-      }
-    }
-
-    // Update last sync time and status
-    await prisma.integration.update({
-      where: { id: req.params.id },
-      data: {
-        lastSync: new Date(),
-        status: result.success ? 'synced' : 'error',
-      },
-    })
+    // Use the sync service for consistent behavior with scheduled syncs
+    const result = await executeSyncWithLogging(req.params.id)
 
     res.json({
       success: result.success,
-      rowCount: result.data.length,
-      fieldsUpdated: integration.dataFields.length,
-      syncedAt: result.fetchedAt,
+      recordsCount: result.recordsCount,
+      duration: result.duration,
       error: result.error,
     })
   } catch (error) {
     console.error('Error syncing integration:', error)
     res.status(500).json({ error: 'Failed to sync integration' })
+  }
+})
+
+/**
+ * GET /api/integrations/:id/sync-history
+ * Get sync history for an integration
+ */
+integrationRouter.get('/:id/sync-history', async (req: Request, res: Response) => {
+  try {
+    const integration = await prisma.integration.findUnique({
+      where: { id: req.params.id },
+    })
+
+    if (!integration) {
+      res.status(404).json({ error: 'Integration not found' })
+      return
+    }
+
+    const page = parseInt(req.query.page as string) || 1
+    const pageSize = parseInt(req.query.pageSize as string) || 20
+
+    const { logs, total } = await getSyncHistory(req.params.id, { page, pageSize })
+
+    res.json({
+      logs,
+      total,
+      page,
+      pageSize,
+    })
+  } catch (error) {
+    console.error('Error fetching sync history:', error)
+    res.status(500).json({ error: 'Failed to fetch sync history' })
   }
 })
 

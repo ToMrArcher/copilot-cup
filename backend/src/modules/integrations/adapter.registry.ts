@@ -4,6 +4,7 @@ import {
 } from './adapter.interface'
 import { ApiAdapter } from './adapters/api.adapter'
 import { ManualAdapter } from './adapters/manual.adapter'
+import { GraphqlAdapter } from './adapters/graphql.adapter'
 
 /**
  * Registry for integration adapters.
@@ -16,6 +17,7 @@ class AdapterRegistryClass {
     // Register built-in adapters
     this.register(new ApiAdapter())
     this.register(new ManualAdapter())
+    this.register(new GraphqlAdapter())
   }
 
   /**

@@ -15,6 +15,8 @@ export interface WizardState {
   name: string
   type: IntegrationType | null
   config: IntegrationConfig
+  syncInterval: number | null
+  syncEnabled: boolean
 }
 
 interface WizardData {
@@ -28,6 +30,8 @@ const initialData: WizardData = {
     name: '',
     type: null,
     config: {},
+    syncInterval: 3600,
+    syncEnabled: true,
   },
   discoveredFields: [],
   selectedFields: [],
@@ -63,6 +67,8 @@ export function IntegrationWizard() {
               name: integration.name,
               type: integration.type as IntegrationType,
               config: integration.config as IntegrationConfig,
+              syncInterval: integration.syncInterval ?? 3600,
+              syncEnabled: integration.syncEnabled ?? true,
             },
             discoveredFields: [],
             selectedFields: integration.dataFields?.map(f => ({
@@ -94,7 +100,13 @@ export function IntegrationWizard() {
   }
 
   const handleDiscoverFields = async () => {
-    if (data.state.type !== 'API' || !data.state.config.url) return
+    if ((data.state.type !== 'API' && data.state.type !== 'GRAPHQL') || !data.state.config.url) return
+    
+    // For GraphQL, also require a query
+    if (data.state.type === 'GRAPHQL' && !data.state.config.query) {
+      alert('Please enter a GraphQL query before discovering fields')
+      return
+    }
     
     setIsDiscovering(true)
     try {
@@ -141,6 +153,8 @@ export function IntegrationWizard() {
         await integrationsApi.update(id, {
           name: data.state.name,
           config: data.state.config as Record<string, unknown>,
+          syncInterval: data.state.syncInterval,
+          syncEnabled: data.state.syncEnabled,
         })
         integrationId = id
       } else {
@@ -149,6 +163,8 @@ export function IntegrationWizard() {
           name: data.state.name,
           type: data.state.type,
           config: data.state.config as Record<string, unknown>,
+          syncInterval: data.state.syncInterval,
+          syncEnabled: data.state.syncEnabled,
         })
         integrationId = integration.id
       }
@@ -186,6 +202,9 @@ export function IntegrationWizard() {
       case 'connection':
         if (data.state.type === 'API') {
           return !!data.state.config.url
+        }
+        if (data.state.type === 'GRAPHQL') {
+          return !!data.state.config.url && !!data.state.config.query
         }
         return true
       case 'fields':
@@ -279,7 +298,7 @@ export function IntegrationWizard() {
             discoveredFields={data.discoveredFields}
             selectedFields={data.selectedFields}
             onFieldsChange={updateSelectedFields}
-            onDiscover={data.state.type === 'API' ? handleDiscoverFields : undefined}
+            onDiscover={(data.state.type === 'API' || data.state.type === 'GRAPHQL') ? handleDiscoverFields : undefined}
             isDiscovering={isDiscovering}
           />
         )}

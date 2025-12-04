@@ -1,4 +1,4 @@
-export type IntegrationType = 'API' | 'MANUAL' | 'WEBHOOK'
+export type IntegrationType = 'API' | 'MANUAL' | 'WEBHOOK' | 'GRAPHQL'
 
 export type IntegrationStatus = 'pending' | 'active' | 'connected' | 'synced' | 'error'
 
@@ -37,6 +37,10 @@ export interface IntegrationConfig {
   fields?: FieldSchema[]
   description?: string
   updateFrequency?: string
+  // GraphQL-specific
+  query?: string                           // The GraphQL query string
+  variables?: Record<string, unknown>      // Optional query variables
+  operationName?: string                   // Optional operation name for multi-operation documents
 }
 
 export interface FieldSchema {
@@ -63,6 +67,11 @@ export interface Integration {
   createdAt: string
   updatedAt: string
   dataFields: DataField[] | LegacyDataField[]
+  // Sync scheduling fields
+  syncInterval: number | null
+  syncEnabled: boolean
+  nextSyncAt: string | null
+  retryCount: number
 }
 
 export interface IntegrationTypeInfo {
