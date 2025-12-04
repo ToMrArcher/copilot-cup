@@ -35,6 +35,7 @@ import type {
   ListUsersResponse,
   UpdateRoleRequest,
   UpdateRoleResponse,
+  DeleteUserResponse,
 } from '../types/auth'
 import type {
   ShareLink,
@@ -129,6 +130,12 @@ export const authApi = {
     fetchApi<UpdateRoleResponse>(`/api/auth/users/${userId}/role`, {
       method: 'PATCH',
       body: JSON.stringify(data),
+    }),
+
+  // Delete user (admin only)
+  deleteUser: (userId: string) =>
+    fetchApi<DeleteUserResponse>(`/api/auth/users/${userId}`, {
+      method: 'DELETE',
     }),
 }
 

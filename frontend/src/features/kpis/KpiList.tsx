@@ -1,12 +1,16 @@
 import { useState } from 'react'
 import { useKpis } from '../../hooks/useKpis'
+import { useAuth } from '../../hooks/useAuth'
 import { KpiCard } from './KpiCard'
 import { KpiWizard } from './KpiWizard'
 
 export function KpiList() {
   const { data: kpis, isLoading, error } = useKpis()
+  const { user } = useAuth()
   const [showWizard, setShowWizard] = useState(false)
   const [editingKpiId, setEditingKpiId] = useState<string | null>(null)
+
+  const canCreateKpi = user?.role === 'ADMIN' || user?.role === 'EDITOR'
 
   if (isLoading) {
     return (
@@ -35,15 +39,17 @@ export function KpiList() {
             Track your key performance indicators
           </p>
         </div>
-        <button
-          onClick={() => setShowWizard(true)}
-          className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors flex items-center gap-2"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Create KPI
-        </button>
+        {canCreateKpi && (
+          <button
+            onClick={() => setShowWizard(true)}
+            className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Create KPI
+          </button>
+        )}
       </div>
 
       {/* Stats Summary */}
@@ -90,16 +96,21 @@ export function KpiList() {
               d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
             />
           </svg>
-          <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">No KPIs yet</h3>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">
-            Create your first KPI to start tracking performance
+          <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">No KPIs Available</h3>
+          <p className="mt-2 text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+            {canCreateKpi 
+              ? "Create your first KPI to start tracking performance"
+              : "You don't have access to any KPIs yet. Ask an admin or KPI owner to share KPIs with you."
+            }
           </p>
-          <button
-            onClick={() => setShowWizard(true)}
-            className="mt-4 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors"
-          >
-            Create KPI
-          </button>
+          {canCreateKpi && (
+            <button
+              onClick={() => setShowWizard(true)}
+              className="mt-4 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors"
+            >
+              Create KPI
+            </button>
+          )}
         </div>
       )}
 

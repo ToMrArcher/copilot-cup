@@ -101,6 +101,19 @@ kpiRouter.get('/:id/history', async (req: Request, res: Response) => {
     const period = (req.query.period as string) || '30d'
     const interval = req.query.interval as AggregationInterval | undefined
 
+    // Check access permission
+    const ctx = getPermissionContext(req)
+    if (!ctx) {
+      res.status(404).json({ error: 'KPI not found' })
+      return
+    }
+    
+    const hasAccess = await canAccessKpi(ctx, id, 'VIEW')
+    if (!hasAccess) {
+      res.status(404).json({ error: 'KPI not found' })
+      return
+    }
+
     // Validate interval if provided
     if (interval && !['hourly', 'daily', 'weekly', 'monthly'].includes(interval)) {
       res.status(400).json({ 
@@ -132,7 +145,13 @@ kpiRouter.get('/:id/history', async (req: Request, res: Response) => {
 kpiRouter.get('/', async (req: Request, res: Response) => {
   try {
     const ctx = getPermissionContext(req)
-    const accessFilter = ctx ? getAccessibleKpisFilter(ctx) : {}
+    
+    // If not authenticated, return empty list (KPIs require auth to view)
+    if (!ctx) {
+      return res.json({ kpis: [] })
+    }
+    
+    const accessFilter = getAccessibleKpisFilter(ctx)
 
     const kpis = await prisma.kpi.findMany({
       where: accessFilter,
@@ -207,13 +226,17 @@ kpiRouter.get('/:id', async (req: Request, res: Response) => {
   try {
     const ctx = getPermissionContext(req)
     
-    // Check view permission
-    if (ctx) {
-      const hasAccess = await canAccessKpi(ctx, req.params.id, 'VIEW')
-      if (!hasAccess) {
-        res.status(403).json({ error: 'Access denied' })
-        return
-      }
+    // Require authentication and check view permission
+    // Return 404 instead of 403 to prevent information leakage
+    if (!ctx) {
+      res.status(404).json({ error: 'KPI not found' })
+      return
+    }
+    
+    const hasAccess = await canAccessKpi(ctx, req.params.id, 'VIEW')
+    if (!hasAccess) {
+      res.status(404).json({ error: 'KPI not found' })
+      return
     }
 
     const kpi = await prisma.kpi.findUnique({

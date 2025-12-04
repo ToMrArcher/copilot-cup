@@ -85,6 +85,11 @@ export interface UpdateRoleResponse {
   user: User
 }
 
+// Delete user response
+export interface DeleteUserResponse {
+  message: string
+}
+
 // Password validation result
 export interface PasswordValidation {
   isValid: boolean

@@ -320,3 +320,46 @@ authRouter.patch('/users/:id/role', requireAuth, async (req: Request, res: Respo
     res.status(500).json({ error: 'Failed to update role' })
   }
 })
+
+/**
+ * DELETE /api/auth/users/:id
+ * Delete a user (admin only)
+ */
+authRouter.delete('/users/:id', requireAuth, async (req: Request, res: Response) => {
+  try {
+    if (req.user!.role !== 'ADMIN') {
+      res.status(403).json({ error: 'Admin access required' })
+      return
+    }
+
+    const userId = req.params.id
+
+    // Prevent admin from deleting themselves
+    if (userId === req.user!.id) {
+      res.status(400).json({ error: 'Cannot delete your own account' })
+      return
+    }
+
+    // Check if user exists
+    const userToDelete = await prisma.user.findUnique({
+      where: { id: userId },
+    })
+
+    if (!userToDelete) {
+      res.status(404).json({ error: 'User not found' })
+      return
+    }
+
+    // Delete user (cascade will handle related records based on schema)
+    await prisma.user.delete({
+      where: { id: userId },
+    })
+
+    res.json({
+      message: 'User deleted successfully',
+    })
+  } catch (error) {
+    console.error('Delete user error:', error)
+    res.status(500).json({ error: 'Failed to delete user' })
+  }
+})
