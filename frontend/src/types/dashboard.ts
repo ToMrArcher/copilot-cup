@@ -2,7 +2,7 @@
  * Dashboard Types
  */
 
-export type WidgetType = 'number' | 'stat' | 'gauge' | 'line' | 'bar' | 'area'
+export type WidgetType = 'number' | 'stat' | 'gauge' | 'line' | 'bar' | 'area' | 'image'
 
 export type AccessPermission = 'VIEW' | 'EDIT'
 
@@ -45,6 +45,11 @@ export interface WidgetConfig {
   showTarget?: boolean
   period?: string
   interval?: string
+  // Image widget fields
+  imageUrl?: string
+  altText?: string
+  objectFit?: 'contain' | 'cover' | 'fill'
+  caption?: string
 }
 
 export interface Widget {

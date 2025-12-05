@@ -6,6 +6,7 @@
 import { useState, useCallback, useRef } from 'react'
 import { useDashboard, useDeleteWidget, useUpdateLayout, useKpiHistory } from '../../hooks/useDashboards'
 import { NumberWidget, StatWidget, GaugeWidget, ChartWidget } from './widgets'
+import { ImageWidget } from './ImageWidget'
 import { CreateShareModal } from '../sharing/CreateShareModal'
 import { AccessManagementDialog } from '../../components/AccessManagementDialog'
 import { DraggableGrid } from './DraggableGrid'
@@ -286,6 +287,17 @@ function WidgetRenderer({ widget, onDelete, canEdit = true }: WidgetRendererProp
         return (
           <ChartWidgetWithHistory
             widget={widget}
+            onDelete={handleDelete}
+          />
+        )
+      
+      case 'image':
+        return (
+          <ImageWidget
+            imageUrl={config?.imageUrl || ''}
+            altText={config?.altText}
+            objectFit={config?.objectFit}
+            caption={config?.caption}
             onDelete={handleDelete}
           />
         )

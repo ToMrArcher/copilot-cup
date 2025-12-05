@@ -80,13 +80,13 @@
 
 ---
 
-## Phase 5: Read-Only Mode ✅
+## Phase 5: Read-Only Mode
 
 ### 5.1 Public/Shared Dashboards
-- [x] Pass `isReadOnly` prop to DraggableGrid
-- [x] Disable drag when read-only
-- [x] Disable resize when read-only
-- [x] Hide drag/resize handles in read-only mode
+- [ ] Pass `isReadOnly` prop to DraggableGrid
+- [ ] Disable drag when read-only
+- [ ] Disable resize when read-only
+- [ ] Hide drag/resize handles in read-only mode
 
 ---
 

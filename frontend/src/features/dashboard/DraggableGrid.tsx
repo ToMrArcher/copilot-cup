@@ -27,6 +27,7 @@ const WIDGET_CONSTRAINTS: Record<string, { minW: number; minH: number; maxW?: nu
   line: { minW: 3, minH: 2, maxW: 12, maxH: 6 },
   bar: { minW: 3, minH: 2, maxW: 12, maxH: 6 },
   area: { minW: 3, minH: 2, maxW: 12, maxH: 6 },
+  image: { minW: 2, minH: 2, maxW: 12, maxH: 8 },
 }
 
 interface DraggableGridProps {

@@ -90,6 +90,7 @@ export const defaultChartOptions: ChartOptions<'line'> = {
     },
     y: {
       beginAtZero: false,
+      grace: '10%',
       grid: {
         color: chartColors.neutralLight,
       },
@@ -141,6 +142,7 @@ export function getChartOptions(isDark: boolean): ChartOptions<'line'> {
       },
       y: {
         beginAtZero: false,
+        grace: '10%',
         grid: {
           color: colors.neutralLight,
         },
